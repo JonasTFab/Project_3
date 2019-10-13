@@ -1,7 +1,8 @@
 #include <iostream>
 #include <armadillo>
 #include <string>
-
+#include <cstdlib>
+#include "lib.h"
 const double pi = 3.141592653589793238463;
 const double eps = 1e-8;
 const double eps2 = 3e-14;
@@ -10,6 +11,10 @@ const int max = 10;
 
 //using namespace std;
 //using namespace arma;
+double brute_monte_carlo(){
+  std::cout << rand() << std::endl;
+    return 0;
+}
 
 double integrating_function(double x1, double y1, double z1, double x2, double y2, double z2){
     int alpha = 2;
@@ -241,7 +246,7 @@ int main(){
 
 
 
-
+    brute_monte_carlo();
 
     return 0;
 }   // end of main
