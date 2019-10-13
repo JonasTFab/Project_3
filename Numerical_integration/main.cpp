@@ -2,7 +2,10 @@
 #include <armadillo>
 #include <string>
 #include <cstdlib>
-#include "lib.h"
+#include <ctime>
+//using namespace std;
+//using namespace arma;
+double invers_period = (1./RAND_MAX);
 const double pi = 3.141592653589793238463;
 const double eps = 1e-8;
 const double eps2 = 3e-14;
@@ -11,10 +14,7 @@ const int max = 10;
 
 //using namespace std;
 //using namespace arma;
-double brute_monte_carlo(){
-  std::cout << rand() << std::endl;
-    return 0;
-}
+
 
 double integrating_function(double x1, double y1, double z1, double x2, double y2, double z2){
     int alpha = 2;
@@ -41,6 +41,36 @@ double integrating_function(double x1, double y1, double z1, double x2, double y
        ** and return the abcissas in x[0,...,n - 1] and the weights in w[0,...,n - 1]
        ** of length n of the Gauss--Legendre n--point quadrature formulae.
        */
+
+       double brute_monte_carlo(){
+         int n, i;
+         n = 1000000; //number of monte carlo samples
+         srand(time(NULL));// seed random number generator with the time now
+         //Crude monte carlo evaluation
+         double crude_mc, sum_sigma, func, variance;
+         double x1, y1, z1, x2, y2, z2;
+         crude_mc = sum_sigma = 0.;
+         for (i = 0; i <= n; i++){
+
+           //initialize the random numbers
+           x1 = rand()*invers_period;
+           y1 = rand()*invers_period;
+           z1 = rand()*invers_period;
+           x2 = rand()*invers_period;
+           y2 = rand()*invers_period;
+           z2 = rand()*invers_period;
+           func = integrating_function(x1,y1,z1,x2,y2,z2);
+           crude_mc  += func;
+           sum_sigma += pow(func,2);
+           //std::cout << x1 << x2 << y1 << z1 << std::endl;
+         }
+         crude_mc = crude_mc/((double) n);
+         sum_sigma = sum_sigma/((double) n);
+         variance = sum_sigma - crude_mc * crude_mc;
+
+         std::cout <<"Brute force MC integration:"<< crude_mc << " STD:" << sum_sigma << std::endl;
+           return crude_mc;
+         }
 
 void gauss_legendre(double x1, double x2, double x[], double w[], int N)
 {
@@ -197,7 +227,7 @@ int main(){
             }
         }
 
-        std::cout << int_gauss_legendre << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
+        std::cout << "Gauss-Legendre integration yields:"<< int_gauss_legendre << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(int_gauss_legendre-5*pi*pi/(16*16)) << std::endl;
 
     } // end of Legendre method
@@ -222,13 +252,14 @@ int main(){
                             for (int i6 = 1; i6 <= N; i6++){
                                         int_gauss_laguerre += Wgl[i1]*Wgl[i2]*Wgl[i3]*Wgl[i4]*Wgl[i5]*Wgl[i6]*
                                                 integrating_function(xgl[i1],xgl[i2],xgl[i3],xgl[i4],xgl[i5],xgl[i6]);
+                                                std::cout << xgl[i1] << std::endl;
                             }
                         }
                     }
                 }
             }
         }
-
+        brute_monte_carlo();
         std::cout << int_gauss_laguerre << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(int_gauss_laguerre-5*pi*pi/(16*16)) << std::endl;
 
@@ -241,12 +272,6 @@ int main(){
         return 0;
     }
 
-
-
-
-
-
-    brute_monte_carlo();
 
     return 0;
 }   // end of main
