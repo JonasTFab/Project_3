@@ -1,7 +1,11 @@
 #include <iostream>
 #include <armadillo>
 #include <string>
-
+#include <cstdlib>
+#include <ctime>
+//using namespace std;
+//using namespace arma;
+double invers_period = (1./RAND_MAX);
 const double pi = 3.141592653589793238463;
 const double eps = 1e-8;
 const double eps2 = 3e-14;
@@ -10,6 +14,7 @@ const int max = 10;
 
 //using namespace std;
 //using namespace arma;
+
 
 double integrating_function(double x1, double y1, double z1, double x2, double y2, double z2){
     int alpha = 2;
@@ -49,6 +54,36 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
        ** and return the abcissas in x[0,...,n - 1] and the weights in w[0,...,n - 1]
        ** of length n of the Gauss--Legendre n--point quadrature formulae.
        */
+
+       double brute_monte_carlo(){
+         int n, i;
+         n = 1000000; //number of monte carlo samples
+         srand(time(NULL));// seed random number generator with the time now
+         //Crude monte carlo evaluation
+         double crude_mc, sum_sigma, func, variance;
+         double x1, y1, z1, x2, y2, z2;
+         crude_mc = sum_sigma = 0.;
+         for (i = 0; i <= n; i++){
+
+           //initialize the random numbers
+           x1 = rand()*invers_period;
+           y1 = rand()*invers_period;
+           z1 = rand()*invers_period;
+           x2 = rand()*invers_period;
+           y2 = rand()*invers_period;
+           z2 = rand()*invers_period;
+           func = integrating_function(x1,y1,z1,x2,y2,z2);
+           crude_mc  += func;
+           sum_sigma += pow(func,2);
+           //std::cout << x1 << x2 << y1 << z1 << std::endl;
+         }
+         crude_mc = crude_mc/((double) n);
+         sum_sigma = sum_sigma/((double) n);
+         variance = sum_sigma - crude_mc * crude_mc;
+
+         std::cout <<"Brute force MC integration:"<< crude_mc << " STD:" << sum_sigma << std::endl;
+           return crude_mc;
+         }
 
 void gauss_legendre(double x1, double x2, double x[], double w[], int N)
 {
