@@ -24,11 +24,24 @@ double integrating_function(double x1, double y1, double z1, double x2, double y
     else{
         return exp(-2*alpha*(r1+r2)) / r_diff;
     }
+} // end of integrating_function
+
+
+double int_func_spherical_coord(double r1, double r2, double theta1, double theta2, double phi1, double phi2){
+    double cos_beta = cos(theta1)*cos(theta2) + sin(theta1)*sin(theta2)*cos(phi1-phi2);
+    double r12 = sqrt(fabs(r1*r1 + r2*r2 - 2*r1*r2*cos_beta));
+    if (r12 < 1e-4){
+        return 0;
+    }
+    else{
+        double func = sin(theta1)*sin(theta2) / (1024*r12);
+        return  func;
+    }
 }   // end of integrating function
 
 
 
-// gauss_legendre() + gauss_laguerre() +  gammln() = 99% kopi av Morten sin kode
+// gauss_legendre() + gauss_laguerre() + gammln() = 99% kopi av Morten sin kode
        /*
        ** The function
        **              gauleg()
@@ -118,12 +131,10 @@ double gammln(double xx)
 
 void gauss_laguerre(double *x, double *w, int n, double alf)
 {
-    int i,its,j;
-    double ai;
-    double p1,p2,p3,pp,z,z1;
+    int its;
+    double ai,p1,p2,p3,pp,z,z1;
 
-
-    for (i=1;i<=n;i++) {
+    for (int i=1; i<=n; i++) {
         if (i == 1) {
             z=(1.0+alf)*(3.0+0.92*alf)/(1.0+2.4*n+1.8*alf);
         } else if (i == 2) {
@@ -133,10 +144,10 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
             z += ((1.0+2.55*ai)/(1.9*ai)+1.26*ai*alf/
                 (1.0+3.5*ai))*(z-x[i-2])/(1.0+0.3*alf);
         }
-        for (its=1;its<=max;its++) {
+        for (its=1; its<=max; its++) {
             p1=1.0;
             p2=0.0;
-            for (j=1;j<=n;j++) {
+            for (int j=1; j<=n; j++) {
                 p3=p2;
                 p2=p1;
                 p1=((2*j-1+alf-z)*p2-(j-1+alf)*p3)/j;
@@ -159,19 +170,18 @@ int main(){
     double lamb;
     int N;
     std::string method;
-
     //std::cout << "which method (Legendre(le), Laguerre(la)? " << std::endl;
     //std::cin >> method;
-    method = "la";
+    method = "le";
 
 
     if (method=="le"){
-        //std::cout << "Number of integrating points (mesh): " << std::endl;
-        //std::cin >> N;
-        //std::cout << "Limits of integrations (start = -end): " << std::endl;
-        //std::cin >> lamb;
-        lamb = 2.3;     // given from the python plot of the electron
-        N = 25;
+        std::cout << "Number of integrating points (mesh): " << std::endl;
+        std::cin >> N;
+        std::cout << "Limits of integrations (start = -end. It is found that 2.3 is an ideal value): " << std::endl;
+        std::cin >> lamb;
+        //lamb = 2.3;     // found from the python plot of the electron
+        //N = 25;
         double *x = new double [N];
         double *W = new double [N];
         gauss_legendre(-lamb, lamb, x, W, N);
@@ -192,31 +202,38 @@ int main(){
             }
         }
 
-        std::cout << int_gauss_legendre << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
+        std::cout << "N=" << N << ", lambda=" << lamb << ", I=" << int_gauss_legendre << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(int_gauss_legendre-5*pi*pi/(16*16)) << std::endl;
 
     } // end of Legendre method
 
 
     else if (method=="la"){
-        //std::cout << "Number of integrating points (mesh): " << std::endl;
-        //std::cin >> N;
-        N = 25;
+        std::cout << "Number of integrating points (mesh): " << std::endl;
+        std::cin >> N;
+        //N = 10;
 
         double *xgl = new double [N+1];
         double *Wgl = new double [N+1];
-        double alf = 1;
+        double *xt = new double [N];
+        double *xp = new double [N];
+        double *Wt = new double [N];
+        double *Wp = new double [N];
+        double alf = 2;
+        gauss_legendre(0, pi, xt, Wt, N);
+        gauss_legendre(0, 2*pi, xp, Wp, N);
         gauss_laguerre(xgl, Wgl, N, alf);
+
 
         double int_gauss_laguerre = 0;
         for (int i1 = 1; i1 <= N; i1++){
             for (int i2 = 1; i2 <= N; i2++){
-                for (int i3 = 1; i3 <= N; i3++){
-                    for (int i4 = 1; i4 <= N; i4++){
-                        for (int i5 = 1; i5 <= N; i5++){
-                            for (int i6 = 1; i6 <= N; i6++){
-                                        int_gauss_laguerre += Wgl[i1]*Wgl[i2]*Wgl[i3]*Wgl[i4]*Wgl[i5]*Wgl[i6]*
-                                                integrating_function(xgl[i1],xgl[i2],xgl[i3],xgl[i4],xgl[i5],xgl[i6]);
+                for (int i3 = 0; i3 < N; i3++){
+                    for (int i4 = 0; i4 < N; i4++){
+                        for (int i5 = 0; i5 < N; i5++){
+                            for (int i6 = 0; i6 < N; i6++){
+                                        int_gauss_laguerre += Wgl[i1]*Wgl[i2]*Wt[i3]*Wt[i4]*Wp[i5]*Wp[i6]
+                                                *int_func_spherical_coord(xgl[i1],xgl[i2],xt[i3],xt[i4],xp[i5],xp[i6]);
                             }
                         }
                     }
@@ -224,7 +241,7 @@ int main(){
             }
         }
 
-        std::cout << int_gauss_laguerre << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
+        std::cout << "N=" << N << ", I=" << int_gauss_laguerre << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(int_gauss_laguerre-5*pi*pi/(16*16)) << std::endl;
 
 
@@ -235,11 +252,6 @@ int main(){
         std::cout << "No valid method! Try again!" << std::endl;
         return 0;
     }
-
-
-
-
-
 
 
 

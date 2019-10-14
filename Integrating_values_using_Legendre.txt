@@ -1,0 +1,21 @@
+Integrating values using Legendre (3a):
+----------------------------------
+N=10, lambda=2.3, I=0.11204
+We want 0.192766
+Difference is 0.0807253
+
+N=15, lambda=2.3, I=0.208919
+We want 0.192766
+Difference is 0.0161529
+
+N=20, lambda=2.3, I=0.172009
+We want 0.192766
+Difference is 0.0207566
+
+N=25, lambda=2.3, I=0.190286
+We want 0.192766
+Difference is 0.0024796
+
+N=30, lambda=2.3, I=0.183952
+We want 0.192766
+Difference is 0.00881355

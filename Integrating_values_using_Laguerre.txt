@@ -1,0 +1,21 @@
+Integrating values using Laguerre (3b):
+----------------------------------
+N=10, I=0.186457
+We want 0.192766
+Difference is 0.00630838
+
+N=15, I=0.189759
+We want 0.192766
+Difference is 0.00300674
+
+N=20, I=0.191082
+We want 0.192766
+Difference is 0.00168394
+
+N=25, I=0.191741
+We want 0.192766
+Difference is 0.00102497
+
+N=30, I=0.192114
+We want 0.192766
+Difference is 0.000652004
