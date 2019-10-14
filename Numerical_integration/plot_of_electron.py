@@ -12,4 +12,19 @@ plt.plot(r,psi, label="Electron")
 plt.plot([start,end], [approx_zero,approx_zero], label="approx zero")
 plt.grid(); plt.legend()
 plt.xlabel("Distance r"); plt.ylabel("Psi function of electron")
-plt.show()
+#plt.show()
+K = 273.15
+C_0 = 5567.11
+T_0 = 0+K
+T_1 = 30.5+K
+T_2 = 13.36+K
+m = 0.250
+C_v = 4200
+
+H_m = C_0*(T_1-T_2)/m - C_v*(T_2-T_0)
+print(H_m)
+
+
+gasskonstant = 8.31446261815324
+trout = 43900.41/(gasskonstant*(100+K))
+print(trout)
