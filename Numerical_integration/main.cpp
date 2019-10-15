@@ -82,7 +82,7 @@ double brute_monte_carlo(int n, double a, double b){
          sum_sigma = sum_sigma/((double) n);
          variance = sum_sigma - crude_mc * crude_mc;
 
-         //std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
+         std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
            return crude_mc;
          }
 
@@ -208,15 +208,11 @@ int main(){
     srand(time(NULL));// seed random number generator with the time now
     double mc_integral;
     double limits = 3;
-    for(int i=0; i < 10000; i++){
-      mc_integral += brute_monte_carlo(10000, -limits, limits);
-    }
-    std::cout << mc_integral/10000 << std::endl;
-    brute_monte_carlo(10000, -limits, limits);
+    brute_monte_carlo(100000000, -limits, limits);
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la)? " << std::endl;
     //std::cin >> method;
-    method = "le";
+    //method = "le";
 
 
     if (method=="le"){
