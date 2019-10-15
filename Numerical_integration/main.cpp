@@ -57,13 +57,13 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
 double brute_monte_carlo(int n, double a, double b){
          double invers_period = (1./RAND_MAX);
          //number of monte carlo samples
-         srand(time(NULL));// seed random number generator with the time now
          //Crude monte carlo evaluation
          double crude_mc, sum_sigma, func, variance;
          double x1, y1, z1, x2, y2, z2;
          crude_mc = sum_sigma = 0.;
          double jacobi = pow((b-a),6);
-         for (int i = 0; i <= n; i++){
+         for (int i = 0; i < n; i++){
+           //srand(time(NULL));// seed random number generator with the time now
 
            //initialize the random numbers
            x1 = rand()*invers_period*(b-a)+a;
@@ -78,11 +78,11 @@ double brute_monte_carlo(int n, double a, double b){
            sum_sigma += pow(func,2);
            //std::cout << x1 << x2 << y1 << z1 << std::endl;
          }
-         crude_mc = crude_mc/((double) n);
+         crude_mc = crude_mc/((double) n)*jacobi;
          sum_sigma = sum_sigma/((double) n);
          variance = sum_sigma - crude_mc * crude_mc;
 
-         std::cout <<"Brute force MC integration:"<< crude_mc*jacobi << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
+         //std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
            return crude_mc;
          }
 
@@ -205,7 +205,14 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
 int main(){
     double lamb;
     int N;
-    brute_monte_carlo(100000, -2.3, 2.3);
+    srand(time(NULL));// seed random number generator with the time now
+    double mc_integral;
+    double limits = 3;
+    for(int i=0; i < 10000; i++){
+      mc_integral += brute_monte_carlo(10000, -limits, limits);
+    }
+    std::cout << mc_integral/10000 << std::endl;
+    brute_monte_carlo(10000, -limits, limits);
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la)? " << std::endl;
     //std::cin >> method;
