@@ -48,7 +48,7 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
 
 // gauss_legendre() + gauss_laguerre() + gammln() = 99% kopi av Morten sin kode
 
-double ran(){
+double ran(){//Just a function to make the random initializer look a bit better
     double invers_period = (1./RAND_MAX);
     return rand()*invers_period;
 }
@@ -79,14 +79,36 @@ double brute_monte_carlo(int n, double a, double b){
          crude_mc = crude_mc/((double) n)*jacobi;
          sum_sigma = sum_sigma/((double) n);
          variance = sum_sigma - crude_mc * crude_mc;
-
-         std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " DIFF:" << fabs(crude_mc-5*pi*pi/(16*16)) << std::endl;
            return crude_mc;
          } // end of function brute_monte_carlo
 
-double improved_monte_carlo(){
+double improved_monte_carlo(double R,int n){
+  //number of monte carlo samples
+  //Crude monte carlo evaluation
+  double improved_mc, sum_sigma, func, variance;
+  double r1, r2, theta1, theta2, phi1, phi2;
+  improved_mc = sum_sigma = 0.;
+  double jacobi = pow(acos(-1),3);
+  for (int i = 0; i < n; i++){
+    //srand(time(NULL));// seed random number generator with the time now
 
-}
+    //initialize the random numbers
+    r1 = ran()*R;
+    r2 = ran()*R;
+    theta1 = ran()*pi;
+    theta2 = ran()*pi;
+    phi1 = ran()*2*pi;
+    phi2 = ran()*2*pi;
+    func = int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2);
+    improved_mc  += func;
+    sum_sigma += pow(func,2);
+  }
+  improved_mc = improved_mc/((double) n)*jacobi;
+  sum_sigma = sum_sigma/((double) n);
+  variance = sum_sigma - improved_mc * improved_mc;
+  return improved_mc;
+} // end of function improved_monte_carlo
+
 
 void gauss_legendre(double x1, double x2, double x[], double w[], int N)
 {
@@ -207,11 +229,13 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
 int main(){
     int N;
     double lamb;
+    srand(time(NULL));// seed random number generator with the time now
+    std::cout<<"improved::::"<< improved_monte_carlo(2.3,1000) << std::endl;
 
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc))? " << std::endl;
     //std::cin >> method;
-    method = "mc";
+    //method = "mc";
 
 
     if (method=="le"){
@@ -289,18 +313,15 @@ int main(){
     else if (method=="mc"){
         std::cout << "Number of integrating points (mesh): " << std::endl;
         std::cin >> N;
-        std::cout << "Limits of integrations (start = -end. It is found that 2.3 is an ideal value): " << std::endl;
+        std::cout << "Limits of integrations (start = -end): " << std::endl;
         std::cin >> lamb;
-        //N = 100000;
-        //lamb = 3;
-
-        for (int i=0; i<1000; i++){
-        std::cout << ran() << std::endl;
-        }
 
         srand(time(NULL));// seed random number generator with the time now
+        auto start = std::chrono::high_resolution_clock::now();
         double mc = brute_monte_carlo(N, -lamb, lamb);
-
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed_crude_MC = finish - start;
+        std::cout << "Time crude Monte carlo: " << elapsed_crude_MC.count() << std::endl;
         std::cout << "N=" << N << ", lambda=" << lamb << ", I=" << mc << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(mc-5*pi*pi/(16*16)) << std::endl;
 
