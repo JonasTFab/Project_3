@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 //using namespace std;
 //using namespace arma;
 const double pi = 3.141592653589793238463;
@@ -82,9 +83,13 @@ double brute_monte_carlo(int n, double a, double b){
          sum_sigma = sum_sigma/((double) n);
          variance = sum_sigma - crude_mc * crude_mc;
 
-         std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
+         std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " DIFF:" << fabs(crude_mc-5*pi*pi/(16*16)) << std::endl;
            return crude_mc;
          }
+
+double improved_monte_carlo(){
+
+}
 
 void gauss_legendre(double x1, double x2, double x[], double w[], int N)
 {
@@ -205,10 +210,11 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
 int main(){
     double lamb;
     int N;
+    int N_mc = 500000000;
     srand(time(NULL));// seed random number generator with the time now
     double mc_integral;
-    double limits = 3;
-    brute_monte_carlo(100000000, -limits, limits);
+    double limits = 2.9;
+    brute_monte_carlo(N_mc, -limits, limits);
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la)? " << std::endl;
     //std::cin >> method;
