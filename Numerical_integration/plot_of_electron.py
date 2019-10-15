@@ -12,7 +12,7 @@ plt.plot(r,psi, label="Electron")
 plt.plot([start,end], [approx_zero,approx_zero], label="approx zero")
 plt.grid(); plt.legend()
 plt.xlabel("Distance r"); plt.ylabel("Psi function of electron")
-#plt.show()
+plt.show()
 K = 273.15
 C_0 = 5567.11
 T_0 = 0+K

@@ -54,25 +54,26 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
        ** of length n of the Gauss--Legendre n--point quadrature formulae.
        */
 
-double brute_monte_carlo(){
-         double invers_period = (1./RAND_MAX)/100;
-         int n, i;
-         n = 10000; //number of monte carlo samples
+double brute_monte_carlo(int n, double a, double b){
+         double invers_period = (1./RAND_MAX);
+         //number of monte carlo samples
          srand(time(NULL));// seed random number generator with the time now
          //Crude monte carlo evaluation
          double crude_mc, sum_sigma, func, variance;
          double x1, y1, z1, x2, y2, z2;
          crude_mc = sum_sigma = 0.;
-         for (i = 0; i <= n; i++){
+         double jacobi = pow((b-a),6);
+         for (int i = 0; i <= n; i++){
 
            //initialize the random numbers
-           x1 = rand()*invers_period;
-           y1 = rand()*invers_period;
-           z1 = rand()*invers_period;
-           x2 = rand()*invers_period;
-           y2 = rand()*invers_period;
-           z2 = rand()*invers_period;
-           func = int_func_spherical_coord(x1,y1,z1,x2,y2,z2);//integrating_function(x1,y1,z1,x2,y2,z2);
+           x1 = rand()*invers_period*(b-a)+a;
+           y1 = rand()*invers_period*(b-a)+a;
+           z1 = rand()*invers_period*(b-a)+a;
+           x2 = rand()*invers_period*(b-a)+a;
+           y2 = rand()*invers_period*(b-a)+a;
+           z2 = rand()*invers_period*(b-a)+a;
+           func = integrating_function(x1,y1,z1,x2,y2,z2);
+           //func = int_func_spherical_coord(x1,y1,z1,x2,y2,z2);
            crude_mc  += func;
            sum_sigma += pow(func,2);
            //std::cout << x1 << x2 << y1 << z1 << std::endl;
@@ -81,7 +82,7 @@ double brute_monte_carlo(){
          sum_sigma = sum_sigma/((double) n);
          variance = sum_sigma - crude_mc * crude_mc;
 
-         std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
+         std::cout <<"Brute force MC integration:"<< crude_mc*jacobi << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
            return crude_mc;
          }
 
@@ -204,7 +205,7 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
 int main(){
     double lamb;
     int N;
-    brute_monte_carlo();
+    brute_monte_carlo(100000, -2.3, 2.3);
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la)? " << std::endl;
     //std::cin >> method;
