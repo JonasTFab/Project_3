@@ -5,7 +5,6 @@
 #include <ctime>
 //using namespace std;
 //using namespace arma;
-double invers_period = (1./RAND_MAX);
 const double pi = 3.141592653589793238463;
 const double eps = 1e-8;
 const double eps2 = 3e-14;
@@ -55,9 +54,10 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
        ** of length n of the Gauss--Legendre n--point quadrature formulae.
        */
 
-       double brute_monte_carlo(){
+double brute_monte_carlo(){
+         double invers_period = (1./RAND_MAX)/100;
          int n, i;
-         n = 1000000; //number of monte carlo samples
+         n = 10000; //number of monte carlo samples
          srand(time(NULL));// seed random number generator with the time now
          //Crude monte carlo evaluation
          double crude_mc, sum_sigma, func, variance;
@@ -72,7 +72,7 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
            x2 = rand()*invers_period;
            y2 = rand()*invers_period;
            z2 = rand()*invers_period;
-           func = integrating_function(x1,y1,z1,x2,y2,z2);
+           func = int_func_spherical_coord(x1,y1,z1,x2,y2,z2);//integrating_function(x1,y1,z1,x2,y2,z2);
            crude_mc  += func;
            sum_sigma += pow(func,2);
            //std::cout << x1 << x2 << y1 << z1 << std::endl;
@@ -81,7 +81,7 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
          sum_sigma = sum_sigma/((double) n);
          variance = sum_sigma - crude_mc * crude_mc;
 
-         std::cout <<"Brute force MC integration:"<< crude_mc << " STD:" << sum_sigma << std::endl;
+         std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
            return crude_mc;
          }
 
@@ -204,6 +204,7 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
 int main(){
     double lamb;
     int N;
+    brute_monte_carlo();
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la)? " << std::endl;
     //std::cin >> method;
@@ -220,7 +221,6 @@ int main(){
         double *x = new double [N];
         double *W = new double [N];
         gauss_legendre(-lamb, lamb, x, W, N);
-
         double int_gauss_legendre = 0;
         for (int i1 = 0; i1 < N; i1++){
             for (int i2 = 0; i2 < N; i2++){
