@@ -46,16 +46,13 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
 
 
 // gauss_legendre() + gauss_laguerre() + gammln() = 99% kopi av Morten sin kode
-       /*
-       ** The function
-       **              gauleg()
-       ** takes the lower and upper limits of integration x1, x2, calculates
-       ** and return the abcissas in x[0,...,n - 1] and the weights in w[0,...,n - 1]
-       ** of length n of the Gauss--Legendre n--point quadrature formulae.
-       */
+
+double ran(){
+    double invers_period = (1./RAND_MAX);
+    return rand()*invers_period;
+}
 
 double brute_monte_carlo(int n, double a, double b){
-         double invers_period = (1./RAND_MAX);
          //number of monte carlo samples
          //Crude monte carlo evaluation
          double crude_mc, sum_sigma, func, variance;
@@ -66,12 +63,12 @@ double brute_monte_carlo(int n, double a, double b){
            //srand(time(NULL));// seed random number generator with the time now
 
            //initialize the random numbers
-           x1 = rand()*invers_period*(b-a)+a;
-           y1 = rand()*invers_period*(b-a)+a;
-           z1 = rand()*invers_period*(b-a)+a;
-           x2 = rand()*invers_period*(b-a)+a;
-           y2 = rand()*invers_period*(b-a)+a;
-           z2 = rand()*invers_period*(b-a)+a;
+           x1 = ran()*(b-a)+a;
+           y1 = ran()*(b-a)+a;
+           z1 = ran()*(b-a)+a;
+           x2 = ran()*(b-a)+a;
+           y2 = ran()*(b-a)+a;
+           z2 = ran()*(b-a)+a;
            func = integrating_function(x1,y1,z1,x2,y2,z2);
            //func = int_func_spherical_coord(x1,y1,z1,x2,y2,z2);
            crude_mc  += func;
@@ -84,7 +81,7 @@ double brute_monte_carlo(int n, double a, double b){
 
          //std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
            return crude_mc;
-         }
+         } // end of function brute_monte_carlo
 
 void gauss_legendre(double x1, double x2, double x[], double w[], int N)
 {
@@ -145,7 +142,7 @@ void gauss_legendre(double x1, double x2, double x[], double w[], int N)
       *w_low      = 2.0 * xl/((1.0 - z * z) * pp * pp);
       *(w_high--) = *(w_low++);
    }
-} // End of function gauss_legendre()
+} // end of function gauss_legendre()
 
 
 double gammln(double xx)
@@ -203,20 +200,13 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
 
 
 int main(){
-    double lamb;
     int N;
-    srand(time(NULL));// seed random number generator with the time now
-    double mc_integral;
-    double limits = 3;
-    for(int i=0; i < 10000; i++){
-      mc_integral += brute_monte_carlo(10000, -limits, limits);
-    }
-    std::cout << mc_integral/10000 << std::endl;
-    brute_monte_carlo(10000, -limits, limits);
+    double lamb;
+
     std::string method;
-    //std::cout << "which method (Legendre(le), Laguerre(la)? " << std::endl;
+    //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc))? " << std::endl;
     //std::cin >> method;
-    method = "le";
+    method = "mc";
 
 
     if (method=="le"){
@@ -290,6 +280,26 @@ int main(){
 
     } // end of Laguerre method
 
+
+    else if (method=="mc"){
+        std::cout << "Number of integrating points (mesh): " << std::endl;
+        std::cin >> N;
+        std::cout << "Limits of integrations (start = -end. It is found that 2.3 is an ideal value): " << std::endl;
+        std::cin >> lamb;
+        //N = 100000;
+        //lamb = 3;
+
+        for (int i=0; i<1000; i++){
+        std::cout << ran() << std::endl;
+        }
+
+        srand(time(NULL));// seed random number generator with the time now
+        double mc = brute_monte_carlo(N, -lamb, lamb);
+
+        std::cout << "N=" << N << ", lambda=" << lamb << ", I=" << mc << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
+        std::cout << "Difference is " << fabs(mc-5*pi*pi/(16*16)) << std::endl;
+
+    }
 
     else {
         std::cout << "No valid method! Try again!" << std::endl;
