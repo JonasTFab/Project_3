@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 //using namespace std;
 //using namespace arma;
 const double pi = 3.141592653589793238463;
@@ -79,9 +80,13 @@ double brute_monte_carlo(int n, double a, double b){
          sum_sigma = sum_sigma/((double) n);
          variance = sum_sigma - crude_mc * crude_mc;
 
-         //std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " STD:" << sum_sigma << std::endl;
+         std::cout <<"Brute force MC integration:"<< crude_mc << " Real Value: "<< 5*pi*pi/(16*16) << " DIFF:" << fabs(crude_mc-5*pi*pi/(16*16)) << std::endl;
            return crude_mc;
          } // end of function brute_monte_carlo
+
+double improved_monte_carlo(){
+
+}
 
 void gauss_legendre(double x1, double x2, double x[], double w[], int N)
 {
