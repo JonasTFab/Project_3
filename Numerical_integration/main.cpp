@@ -77,7 +77,6 @@ double p(double y){
 
 double monte_carlo_improved(int N){
     double x1,x2,r1,r2,theta1,theta2,phi1,phi2;
-    int alpha = 2;
     double half_jacobi = 4*pow(pi,4);
     double improved_mc = 0;
     for (int i=0; i<N; i++){
@@ -89,13 +88,7 @@ double monte_carlo_improved(int N){
         theta2 = pi*ran();
         phi1 = 2*pi*ran();
         phi2 = 2*pi*ran();
-        if ((phi1 - phi2) < 1e-7){
-            std::cout << "som ting wong"<< phi1<<phi2 << std::endl;
-        }
-        else{
-          int TTTT = 1;
-        }
-        improved_mc += int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2)/(p(r1)*p(r2));
+        improved_mc += r1*r1*r2*r2*sin(theta1)*sin(theta2)*int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2) / (p(r1)*p(r2));
     }
     improved_mc *= half_jacobi / (N);
     //improved_mc = improved_mc * exp(2*alpha) / (N);
@@ -374,8 +367,7 @@ int main(){
         double mc_int_imp;
         //std::cout << "N: " << std::endl;
         //std::cin >> N;
-        N = 1000000;
-
+        N = 100000;
 
         srand(time(NULL));// seed random number generator with the time now
         for (int k=0; k<20; k++){
