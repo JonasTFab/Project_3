@@ -49,10 +49,53 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
 
 // gauss_legendre() + gauss_laguerre() + gammln() = 99% kopi av Morten sin kode
 
-double ran(){//Just a function to make the random initializer look a bit better
-    double invers_period = (1./RAND_MAX);
-    return rand()*invers_period;
+double ran(){ //Just a function to make the random initializer look a bit better
+    double ran_nr;
+    double err = 1e-4;
+    double invers_period = RAND_MAX;
+    ran_nr = rand()/invers_period;
+    if (ran_nr < err){
+        return err;
+    }
+    else if (ran_nr > (1-err)){
+        return 1-err;
+    }
+    else{
+        return ran_nr;
+    }
+} // end of function ran()
+
+double y(double x){
+    return -log(1-x)/4;
 }
+
+double p(double y){
+    return 4*exp(-4*y);
+}
+
+
+double monte_carlo_improved(int N){
+    double x1,x2,r1,r2,theta1,theta2,phi1,phi2;
+    int alpha = 2;
+    double half_jacobi = 4*pow(pi,4);
+    double improved_mc = 0;
+    for (int i=0; i<N; i++){
+        x1 = ran();
+        x2 = ran();
+        r1 = y(x1);
+        r2 = y(x2);
+        theta1 = pi*ran();
+        theta2 = pi*ran();
+        phi1 = 2*pi*ran();
+        phi2 = 2*pi*ran();
+        improved_mc += int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2) / (p(r1)*p(r2));
+    }
+    improved_mc = improved_mc * exp(2*alpha)*half_jacobi / (N);
+    //improved_mc = improved_mc * exp(2*alpha) / (N);
+    return improved_mc;
+} // end of function mc_improved()
+
+
 
 double brute_monte_carlo(int n, double a, double b){
          //number of monte carlo samples
@@ -83,33 +126,7 @@ double brute_monte_carlo(int n, double a, double b){
            return crude_mc;
          } // end of function brute_monte_carlo
 
-double improved_monte_carlo(double R,int n){
-  //number of monte carlo samples
-  //Crude monte carlo evaluation
-  double improved_mc, sum_sigma, func, variance;
-  double r1, r2, theta1, theta2, phi1, phi2;
-  improved_mc = sum_sigma = 0.;
-  double jacobi = pow(acos(-1),3);
-  double sqrt2 = 1./sqrt(2.);
-  for (int i = 0; i < n; i++){
-    //srand(time(NULL));// seed random number generator with the time now
 
-    //initialize the random numbers
-    r1 = ran()*R;
-    r2 = ran()*R;
-    theta1 = ran()*pi;
-    theta2 = ran()*pi;
-    phi1 = ran()*2*pi;
-    phi2 = ran()*2*pi;
-    func = int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2);
-    improved_mc  += func;
-    sum_sigma += pow(func,2);
-  }
-  improved_mc = improved_mc/((double) n)*jacobi;
-  sum_sigma = sum_sigma/((double) n);
-  variance = sum_sigma - improved_mc * improved_mc;
-  return improved_mc;
-} // end of function improved_monte_carlo
 
 
 void gauss_legendre(double x1, double x2, double x[], double w[], int N)
@@ -246,7 +263,17 @@ void write_to_file(){
 int main(){
     int N;
     double lamb;
-      //std::cout<<"improved::::"<< improved_monte_carlo(2.3,1000) << std::endl;
+
+    double mc_int_imp;
+    //std::cout << "N: " << std::endl;
+    //std::cin >> N;
+    N = 100000;
+
+    srand(time(NULL));// seed random number generator with the time now
+    for (int ii=0; ii<20; ii++){
+        mc_int_imp = monte_carlo_improved(N);
+        std::cout << mc_int_imp << std::endl;
+    }
 
     write_to_file();
 
