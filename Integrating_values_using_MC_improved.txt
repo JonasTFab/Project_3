@@ -1,0 +1,26 @@
+Integrating values using improved Monte Carlo(3d):
+----------------------------------
+N=1000, I=0.194321
+We want 0.192766
+Difference is 0.00155503
+
+N=10000, I=0.182813
+We want 0.192766
+Difference is 0.009953
+
+N=100000, I=0.194763
+We want 0.192766
+Difference is 0.00199721
+
+N=1e+006, I=0.193158
+We want 0.192766
+Difference is 0.000392037
+
+N=1e+007, I=0.19301
+We want 0.192766
+Difference is 0.000244109
+
+N=1e+008, I=0.192676
+We want 0.192766
+Difference is 9.0029e-005
+
