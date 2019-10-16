@@ -93,7 +93,6 @@ double monte_carlo_improved(int N){
         F_tilde = r1*r1*r2*r2*sin(theta1)*sin(theta2)*int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2) / (p(r1)*p(r2));
         improved_mc += F_tilde;
         sigma1 += F_tilde*F_tilde;
-        sigma2 += F_tilde;
     }
     sigma1 /= N;
     sigma2 = (improved_mc/N)*(improved_mc/N);
