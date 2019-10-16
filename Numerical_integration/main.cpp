@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include <fstream>
 //using namespace std;
 //using namespace arma;
 const double pi = 3.141592653589793238463;
@@ -89,6 +90,7 @@ double improved_monte_carlo(double R,int n){
   double r1, r2, theta1, theta2, phi1, phi2;
   improved_mc = sum_sigma = 0.;
   double jacobi = pow(acos(-1),3);
+  double sqrt2 = 1./sqrt(2.);
   for (int i = 0; i < n; i++){
     //srand(time(NULL));// seed random number generator with the time now
 
@@ -223,14 +225,30 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
     }
 } // end of function gauss_legendre()
 
+void write_to_file(){
+  srand(time(NULL));// seed random number generator with the time now
+  int num = 9;
+  double lamb = 2.3;
+  std::ofstream data;
+  data.open("brute_monte_carlo_accuracy.txt");
+  //data << "N" << "Integral" << "Error" << std::endl;
+  for (int i = 1; i < num;i++){
+    int N = pow(10,i);
+    double mc = brute_monte_carlo(N, -lamb, lamb);
+    double error = fabs(mc - 5*pi*pi/(16*16));
+    data << N << " " << mc << " " << error << std::endl;
+  }
+  data.close();
+}
 
 
 
 int main(){
     int N;
     double lamb;
-    srand(time(NULL));// seed random number generator with the time now
-    std::cout<<"improved::::"<< improved_monte_carlo(2.3,1000) << std::endl;
+      //std::cout<<"improved::::"<< improved_monte_carlo(2.3,1000) << std::endl;
+
+    write_to_file();
 
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc))? " << std::endl;
