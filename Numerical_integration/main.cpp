@@ -5,6 +5,7 @@
 #include <ctime>
 #include <chrono>
 #include <fstream>
+#include "mpi.h"
 //using namespace std;
 //using namespace arma;
 const double pi = 3.141592653589793238463;
@@ -78,7 +79,8 @@ double p(double y){
 double monte_carlo_improved(int N){
     double x1,x2,r1,r2,theta1,theta2,phi1,phi2;
     double half_jacobi = 4*pow(pi,4);
-    double improved_mc = 0;
+    double improved_mc,sum_sigma,variance;
+    improved_mc = sum_sigma = 0;
     for (int i=0; i<N; i++){
         x1 = ran();
         x2 = ran();
@@ -89,8 +91,12 @@ double monte_carlo_improved(int N){
         phi1 = 2*pi*ran();
         phi2 = 2*pi*ran();
         improved_mc += r1*r1*r2*r2*sin(theta1)*sin(theta2)*int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2) / (p(r1)*p(r2));
+        sum_sigma += pow(improved_mc,2);
     }
     improved_mc *= half_jacobi / (N);
+    sum_sigma = sum_sigma/((double) N);
+    variance = sum_sigma - improved_mc * improved_mc;
+
     //improved_mc = improved_mc * exp(2*alpha) / (N);
     return improved_mc;
 } // end of function mc_improved()
@@ -104,6 +110,7 @@ double brute_monte_carlo(int n, double a, double b){
          double x1, y1, z1, x2, y2, z2;
          crude_mc = sum_sigma = 0.;
          double jacobi = pow((b-a),6);
+         auto start = std::chrono::high_resolution_clock::now();
          for (int i = 0; i < n; i++){
            //srand(time(NULL));// seed random number generator with the time now
 
@@ -117,12 +124,18 @@ double brute_monte_carlo(int n, double a, double b){
            func = integrating_function(x1,y1,z1,x2,y2,z2);
            //func = int_func_spherical_coord(x1,y1,z1,x2,y2,z2);
            crude_mc  += func;
-           sum_sigma += pow(func,2);
+           //sum_sigma += pow(func,2);
            //std::cout << x1 << x2 << y1 << z1 << std::endl;
          }
          crude_mc = crude_mc/((double) n)*jacobi;
-         sum_sigma = sum_sigma/((double) n);
-         variance = sum_sigma - crude_mc * crude_mc;
+         //sum_sigma = sum_sigma/((double) n);
+         //variance = sum_sigma - crude_mc * crude_mc;
+         auto finish = std::chrono::high_resolution_clock::now();
+         std::chrono::duration<double> elapsed_crude_MC = finish - start;
+         std::cout << "N = "<< n << " I = " << crude_mc << std::endl;
+         std::cout << "Actual value = " << 5*pi*pi/(16*16) << "Error = " << fabs( crude_mc - 5*pi*pi/(16*16)) << std::endl;
+         std::cout << "Elapsed time:" << elapsed_crude_MC.count() << "\n" << std::endl;
+
            return crude_mc;
          } // end of function brute_monte_carlo
 
@@ -268,8 +281,8 @@ int main(){
 
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
-    //std::cin >> method;
-    method = "mc_i";
+    std::cin >> method;
+    //method = "mc_i";
 
 
     if (method=="le"){
@@ -351,13 +364,13 @@ int main(){
         std::cin >> N;
         std::cout << "Limits of integrations (start = -end): " << std::endl;
         std::cin >> lamb;
-
+        std::cout << "integrating values using brute force Monte-carlo integration\n-------------------------------------------\n";
         srand(time(NULL));// seed random number generator with the time now
-        auto start = std::chrono::high_resolution_clock::now();
+        for(int i = 1; i <= N; i++){
+          brute_monte_carlo(pow(10,i), -lamb, lamb);
+        }
         double mc = brute_monte_carlo(N, -lamb, lamb);
-        auto finish = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed_crude_MC = finish - start;
-        std::cout << "Time crude Monte carlo: " << elapsed_crude_MC.count() << std::endl;
+
         std::cout << "N=" << N << ", lambda=" << lamb << ", I=" << mc << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(mc-5*pi*pi/(16*16)) << std::endl;
     }   // end of Monte Carlo method
@@ -371,7 +384,10 @@ int main(){
 
         srand(time(NULL));// seed random number generator with the time now
         for (int k=0; k<20; k++){
+            auto start_improv = std::chrono::high_resolution_clock::now();
             mc_int_imp = monte_carlo_improved(N);
+            auto finish_improv = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed_improved_MC = finish_improv - start_improv;
             std::cout << mc_int_imp << std::endl;
         }
 
