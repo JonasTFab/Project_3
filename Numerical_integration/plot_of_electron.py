@@ -28,7 +28,7 @@ for i in range(size):
     N[i] = line[0]
     error[i] = line[2]
 
-plt.plot(N[2:-1],error[2:-1]); plt.grid()
+plt.plot(N[1:-1],error[1:-1]); plt.grid()
 plt.title("Accuracy by number of simulations")
 plt.xlabel("N")
 plt.ylabel("Error")
