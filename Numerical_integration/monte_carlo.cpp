@@ -3,6 +3,7 @@
 #include <iostream>
 #include <armadillo>
 #include <string>
+#include "mpi.h"
 
 //new stuff
 #include <cstdlib>
@@ -13,7 +14,7 @@ const double eps = 1e-8;
 const double eps2 = 3e-14;
 const int max = 10;
 double exact = 5.*pow(pi,2)/pow(16,2);
-//using namespace std;
+using namespace std;
 //using namespace arma;
 double invers_period = 1./RAND_MAX;
 
@@ -33,7 +34,13 @@ double integrating_function(double x1, double y1, double z1, double x2, double y
 }   // end of integrating function
 
 
-int main(){
+int main(int nargs, char* args[]){
+  int numprocs, my_rank; // MPI initializations
+  MPI_Init (&nargs, &args);
+  MPI_Comm_size (MPI_COMM_WORLD, &numprocs);
+  MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
+  cout << "Hello world, I have rank " << my_rank << " out of " << numprocs << std::endl; // End MPI
+  MPI_Finalize ();
   int n, i;
   n = 1000000; //number of monte carlo samples
   srand(time(NULL));// seed random number generator with the time now

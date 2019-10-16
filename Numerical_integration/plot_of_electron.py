@@ -9,7 +9,8 @@ psi = np.exp(-alpha*r)
 approx_zero = 0.01
 
 plt.plot(r,psi, label="Electron")
-plt.plot([start,end], [approx_zero,approx_zero], label="approx zero")
+#plt.plot([start,end], [approx_zero,approx_zero], label="approx zero")
+plt.plot(3,0.0025,'X', label="approx zero", color = "r")
 plt.grid(); plt.legend()
 plt.xlabel("Distance r"); plt.ylabel("Psi function of electron")
 plt.show()
