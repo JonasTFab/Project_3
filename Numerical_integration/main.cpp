@@ -34,13 +34,14 @@ double integrating_function(double x1, double y1, double z1, double x2, double y
 
 
 double int_func_spherical_coord(double r1, double r2, double theta1, double theta2, double phi1, double phi2){
+    int alpha = 2;
     double cos_beta = cos(theta1)*cos(theta2) + sin(theta1)*sin(theta2)*cos(phi1-phi2);
     double r12 = sqrt(fabs(r1*r1 + r2*r2 - 2*r1*r2*cos_beta));
     if (r12 < 1e-4){
         return 0;
     }
     else{
-        double func = sin(theta1)*sin(theta2) / (1024*r12);
+        double func = exp(-2*alpha*(r1+r2)) / r12;
         return  func;
     }
 }   // end of integrating function
@@ -90,7 +91,7 @@ double monte_carlo_improved(int N){
         phi2 = 2*pi*ran();
         improved_mc += int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2) / (p(r1)*p(r2));
     }
-    improved_mc = improved_mc * exp(2*alpha)*half_jacobi / (N);
+    improved_mc *= exp(2*alpha)*half_jacobi / (N);
     //improved_mc = improved_mc * exp(2*alpha) / (N);
     return improved_mc;
 } // end of function mc_improved()
@@ -244,18 +245,14 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
 
 void write_to_file(){
   srand(time(NULL));// seed random number generator with the time now
-  int num = 10;
+  int num = 9;
   double lamb = 2.3;
-  double mc;
   std::ofstream data;
   data.open("brute_monte_carlo_accuracy.txt");
   //data << "N" << "Integral" << "Error" << std::endl;
   for (int i = 1; i < num;i++){
     int N = pow(10,i);
-    for (int j = 0; j < 100; j++){
-      mc += brute_monte_carlo(N, -lamb, lamb);
-  }
-    mc = mc/100;
+    double mc = brute_monte_carlo(N, -lamb, lamb);
     double error = fabs(mc - 5*pi*pi/(16*16));
     data << N << " " << mc << " " << error << std::endl;
   }
@@ -268,23 +265,12 @@ int main(){
     int N;
     double lamb;
 
-    double mc_int_imp;
-    //std::cout << "N: " << std::endl;
-    //std::cin >> N;
-    N = 100000;
-
-    srand(time(NULL));// seed random number generator with the time now
-    for (int ii=0; ii<20; ii++){
-        mc_int_imp = monte_carlo_improved(N);
-        std::cout << mc_int_imp << std::endl;
-    }
-
-    write_to_file();
+    //write_to_file();
 
     std::string method;
-    //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc))? " << std::endl;
+    //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
     //std::cin >> method;
-    //method = "mc";
+    method = "mc_i";
 
 
     if (method=="le"){
@@ -320,6 +306,7 @@ int main(){
 
 
     else if (method=="la"){
+        int alpha = 2;
         std::cout << "Number of integrating points (mesh): " << std::endl;
         std::cin >> N;
         //N = 10;
@@ -344,7 +331,8 @@ int main(){
                         for (int i5 = 0; i5 < N; i5++){
                             for (int i6 = 0; i6 < N; i6++){
                                         int_gauss_laguerre += Wgl[i1]*Wgl[i2]*Wt[i3]*Wt[i4]*Wp[i5]*Wp[i6]
-                                                *int_func_spherical_coord(xgl[i1],xgl[i2],xt[i3],xt[i4],xp[i5],xp[i6]);
+                                                *int_func_spherical_coord(xgl[i1],xgl[i2],xt[i3],xt[i4],xp[i5],xp[i6])
+                                                *sin(xt[i3])*sin(xt[i4]) / (1024*exp(-2*alpha*(xgl[i1]+xgl[i2])));
                             }
                         }
                     }
@@ -373,6 +361,21 @@ int main(){
         std::cout << "Time crude Monte carlo: " << elapsed_crude_MC.count() << std::endl;
         std::cout << "N=" << N << ", lambda=" << lamb << ", I=" << mc << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(mc-5*pi*pi/(16*16)) << std::endl;
+    }   // end of Monte Carlo method
+
+
+    else if (method=="mc_i"){
+        double mc_int_imp;
+        //std::cout << "N: " << std::endl;
+        //std::cin >> N;
+        N = 1000;
+
+
+        srand(time(NULL));// seed random number generator with the time now
+        for (int k=0; k<20; k++){
+            mc_int_imp = monte_carlo_improved(N);
+            std::cout << mc_int_imp << std::endl;
+        }
 
     }
 
