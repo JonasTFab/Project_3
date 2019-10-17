@@ -137,10 +137,11 @@ double brute_monte_carlo(int N, double a, double b){
 
          double func, variance;
          double x1, y1, z1, x2, y2, z2;
-         crude_mc = sum_sigma = 0.;
+         double crude_mc = 0;
+         double sigma1 = 0;
          double jacobi = pow((b-a),6);
          auto start = std::chrono::high_resolution_clock::now();
-         for (int i = 0; i < n; i++){
+         for (int i = 0; i < N; i++){
            //srand(time(NULL));// seed random number generator with the time now
 
          double jacobi = pow((b-a),6);
@@ -156,12 +157,12 @@ double brute_monte_carlo(int N, double a, double b){
            crude_mc  += func;
            sigma1 += func*func;
          }
-         crude_mc = crude_mc/((double) n)*jacobi;
-         sum_sigma = sum_sigma/((double) n);
-         variance = sum_sigma - crude_mc * crude_mc;
+         crude_mc = crude_mc/((double) N)*jacobi;
+         sigma1 /= N;
+         variance = sigma1 - crude_mc * crude_mc;
          auto finish = std::chrono::high_resolution_clock::now();
          std::chrono::duration<double> elapsed_crude_MC = finish - start;
-         std::cout << "N = "<< n << " \nI = " << crude_mc << std::endl;
+         std::cout << "N = "<< N << " \nI = " << crude_mc << std::endl;
          std::cout << "Variance = "<< variance << std::endl;
          std::cout << "Actual value = " << 5*pi*pi/(16*16) << "Error = " << fabs( crude_mc - 5*pi*pi/(16*16)) << std::endl;
          std::cout << "Elapsed time:" << elapsed_crude_MC.count() << "\n" << std::endl;
