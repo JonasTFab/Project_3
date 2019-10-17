@@ -77,6 +77,16 @@ double p(double y){
 
 
 double monte_carlo_improved(int N){
+    int argc;
+    char **argv;
+    MPI_Init(&argc, &argv);
+    std::cout << "aaaa" << std::endl;
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    // Get the rank of the process
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
     double x1,x2,r1,r2,theta1,theta2,phi1,phi2,F_tilde,variance;
     double half_jacobi = 4*pow(pi,4);
     double improved_mc = 0;
@@ -84,6 +94,7 @@ double monte_carlo_improved(int N){
     double sigma2 = 0;
     auto start = std::chrono::high_resolution_clock::now();
     for (int i=0; i<N; i++){
+        std::cout << "bbb" << std::endl;
         x1 = ran();
         x2 = ran();
         r1 = y(x1);
@@ -111,6 +122,7 @@ double monte_carlo_improved(int N){
     std::cout << "Error = " << fabs( improved_mc - 5*pi*pi/(16*16)) << std::endl;
     std::cout << "Variance = " << variance << std::endl;
     std::cout << "Elapsed time:" << elapsed_improved_MC.count() << "s\n" << std::endl;
+    MPI_Finalize();
     return improved_mc;
 } // end of function mc_improved()
 
@@ -137,15 +149,16 @@ double brute_monte_carlo(int n, double a, double b){
            func = integrating_function(x1,y1,z1,x2,y2,z2);
            //func = int_func_spherical_coord(x1,y1,z1,x2,y2,z2);
            crude_mc  += func;
-           //sum_sigma += pow(func,2);
+           sum_sigma += pow(func,2);
            //std::cout << x1 << x2 << y1 << z1 << std::endl;
          }
          crude_mc = crude_mc/((double) n)*jacobi;
-         //sum_sigma = sum_sigma/((double) n);
-         //variance = sum_sigma - crude_mc * crude_mc;
+         sum_sigma = sum_sigma/((double) n);
+         variance = sum_sigma - crude_mc * crude_mc;
          auto finish = std::chrono::high_resolution_clock::now();
          std::chrono::duration<double> elapsed_crude_MC = finish - start;
-         std::cout << "N = "<< n << " I = " << crude_mc << std::endl;
+         std::cout << "N = "<< n << " \nI = " << crude_mc << std::endl;
+         std::cout << "Variance = "<< variance << std::endl;
          std::cout << "Actual value = " << 5*pi*pi/(16*16) << "Error = " << fabs( crude_mc - 5*pi*pi/(16*16)) << std::endl;
          std::cout << "Elapsed time:" << elapsed_crude_MC.count() << "\n" << std::endl;
 
@@ -371,7 +384,7 @@ int main(){
 
 
     else if (method=="mc"){
-        std::cout << "Number of integrating points (mesh): " << std::endl;
+        std::cout << "Number of integrating points 10^N (mesh): " << std::endl;
         std::cin >> N;
         std::cout << "Limits of integrations (start = -end): " << std::endl;
         std::cin >> lamb;
@@ -395,7 +408,6 @@ int main(){
         srand(time(NULL));// seed random number generator with the time now
         std::cout << "integrating values using Importance sampling\n-------------------------------------------\n";
         for (int k=1; k<=8; k++){
-
             auto start_improv = std::chrono::high_resolution_clock::now();
             mc_int_imp = monte_carlo_improved(pow(10,k));
             auto finish_improv = std::chrono::high_resolution_clock::now();
