@@ -48,8 +48,6 @@ double int_func_spherical_coord(double r1, double r2, double theta1, double thet
 
 
 
-// gauss_legendre() + gauss_laguerre() + gammln() = 99% kopi av Morten sin kode
-
 double ran(){ //Just a function to make the random initializer look a bit better
     double ran_nr;
     double err = 1e-4;
@@ -66,21 +64,29 @@ double ran(){ //Just a function to make the random initializer look a bit better
     }
 } // end of function ran()
 
-double y(double x){
+double y(double x){ // cumulative function
     return -log(1-x)/4;
 }
 
-double p(double y){
+double p(double y){ // PDF
     return 4*exp(-4*y);
 }
 
 
+// The improved Monte Carlo method. This method has the variables changed to
+// spherical coordinate instead of cartesian.
 double monte_carlo_improved(int N){
-    double x1,x2,r1,r2,theta1,theta2,phi1,phi2,F_tilde,variance;
+    // N is the number of samples using Monte Carlo
+    double x1, x2, F_tilde, variance;
+    double r1, r2, theta1, theta2, phi1, phi2;
     double half_jacobi = 4*pow(pi,4);
     double improved_mc = 0;
     double sigma1 = 0;
     double sigma2 = 0;
+
+    // x1 and x2 generates random number between 0 and 1.
+    // r, theta and phi is then generated within the respective
+    // intervals. Then calculates the integral for each step that will be summarized.
     for (int i=0; i<N; i++){
         x1 = ran();
         x2 = ran();
@@ -93,49 +99,55 @@ double monte_carlo_improved(int N){
         F_tilde = r1*r1*r2*r2*sin(theta1)*sin(theta2)*int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2) / (p(r1)*p(r2));
         improved_mc += F_tilde;
         sigma1 += F_tilde*F_tilde;
-        sigma2 += F_tilde;
     }
     sigma1 /= N;
     sigma2 = (improved_mc/N)*(improved_mc/N);
     variance = sigma1 - sigma2;
-    improved_mc *= half_jacobi / (N);
+    std::cout << "Variance=" << variance << std::endl;
+    improved_mc *= half_jacobi / N;
     return improved_mc;
 } // end of function mc_improved()
 
 
 
-double brute_monte_carlo(int n, double a, double b){
-         //number of monte carlo samples
-         //Crude monte carlo evaluation
-         double crude_mc, sum_sigma, func, variance;
-         double x1, y1, z1, x2, y2, z2;
-         crude_mc = sum_sigma = 0.;
-         double jacobi = pow((b-a),6);
-         for (int i = 0; i < n; i++){
-           //srand(time(NULL));// seed random number generator with the time now
+// Crude Monte Carlo evaluation with cartesian coordinates to
+// describe the two electrons.
+double brute_monte_carlo(int N, double a, double b){
+         // N is number of Monte Carlo samples
 
+         double func, variance;
+         double x1, y1, z1, x2, y2, z2;
+         double crude_mc = 0;
+         double sigma1 = 0;
+         double sigma2 = 0;
+         //arma::vec <double> x_arr = arma::vec(N);
+
+         double jacobi = pow((b-a),6);
+         for (int i = 0; i < N; i++){
            //initialize the random numbers
-           x1 = ran()*(b-a)+a;
-           y1 = ran()*(b-a)+a;
-           z1 = ran()*(b-a)+a;
-           x2 = ran()*(b-a)+a;
-           y2 = ran()*(b-a)+a;
-           z2 = ran()*(b-a)+a;
+           x1 =  ran()*(b-a)+a;
+           y1 =  ran()*(b-a)+a;
+           z1 =  ran()*(b-a)+a;
+           x2 =  ran()*(b-a)+a;
+           y2 =  ran()*(b-a)+a;
+           z2 =  ran()*(b-a)+a;
            func = integrating_function(x1,y1,z1,x2,y2,z2);
-           //func = int_func_spherical_coord(x1,y1,z1,x2,y2,z2);
            crude_mc  += func;
-           sum_sigma += pow(func,2);
-           //std::cout << x1 << x2 << y1 << z1 << std::endl;
+           sigma1 += func*func;
          }
-         crude_mc = crude_mc/((double) n)*jacobi;
-         sum_sigma = sum_sigma/((double) n);
-         variance = sum_sigma - crude_mc * crude_mc;
-           return crude_mc;
+         sigma1 /= N;
+         sigma2 = (crude_mc/N)*(crude_mc/N);
+         variance = jacobi*(sigma1 - sigma2);
+         std::cout << "Variance=" << variance << std::endl;
+         crude_mc = crude_mc * jacobi / N;
+         return crude_mc;
          } // end of function brute_monte_carlo
 
 
+// gauss_legendre() + gauss_laguerre() + gammln() = 99% kopi av Morten sin kode
 
-
+// Function using Gauss-Legendre quadrature to find
+// the weight function and the smooth function.
 void gauss_legendre(double x1, double x2, double x[], double w[], int N)
 {
    int         m,j,i;
@@ -215,6 +227,8 @@ double gammln(double xx)
 } // end of function gammln()
 
 
+// Gauss-Laguerre function that finds both the weigth
+// function and the smooth function.
 void gauss_laguerre(double *x, double *w, int n, double alf)
 {
     int its;
@@ -274,22 +288,26 @@ int main(){
     //write_to_file();
 
     std::string method;
-    //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
-    //std::cin >> method;
-    method = "mc_i";
+    std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
+    std::cin >> method;
+    //method = "mc";
 
 
     if (method=="le"){
-        std::cout << "Number of integrating points (mesh): " << std::endl;
+        std::cout << "Number of integrating points (samples): " << std::endl;
         std::cin >> N;
         std::cout << "Limits of integrations (start = -end. It is found that 2.3 is an ideal value): " << std::endl;
         std::cin >> lamb;
-        //lamb = 2.3;     // found from the python plot of the electron
-        //N = 25;
+
+        // variables that is calculated when sending in to the
+        // Gauss-Legendre quadrature function.
         double *x = new double [N];
         double *W = new double [N];
+
         gauss_legendre(-lamb, lamb, x, W, N);
         double int_gauss_legendre = 0;
+
+        // Runs through N^6 operations to estimate the integral
         for (int i1 = 0; i1 < N; i1++){
             for (int i2 = 0; i2 < N; i2++){
                 for (int i3 = 0; i3 < N; i3++){
@@ -317,6 +335,8 @@ int main(){
         std::cin >> N;
         //N = 10;
 
+        // variables that is calculated when sending in to the
+        // Gauss-Laguerre quadrature function.
         double *xgl = new double [N+1];
         double *Wgl = new double [N+1];
         double *xt = new double [N];
@@ -328,7 +348,7 @@ int main(){
         gauss_legendre(0, 2*pi, xp, Wp, N);
         gauss_laguerre(xgl, Wgl, N, alf);
 
-
+        // Runs through N^6 operations to estimate the integral
         double int_gauss_laguerre = 0;
         for (int i1 = 1; i1 <= N; i1++){
             for (int i2 = 1; i2 <= N; i2++){
@@ -354,35 +374,38 @@ int main(){
 
 
     else if (method=="mc"){
-        std::cout << "Number of integrating points (mesh): " << std::endl;
+        std::cout << "Number of integrating points (samples): " << std::endl;
         std::cin >> N;
         std::cout << "Limits of integrations (start = -end): " << std::endl;
         std::cin >> lamb;
 
         srand(time(NULL));// seed random number generator with the time now
         auto start = std::chrono::high_resolution_clock::now();
-        double mc = brute_monte_carlo(N, -lamb, lamb);
+        double mc_crude = brute_monte_carlo(N, -lamb, lamb);
         auto finish = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed_crude_MC = finish - start;
-        std::cout << "Time crude Monte carlo: " << elapsed_crude_MC.count() << std::endl;
-        std::cout << "N=" << N << ", lambda=" << lamb << ", I=" << mc << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
-        std::cout << "Difference is " << fabs(mc-5*pi*pi/(16*16)) << std::endl;
-    }   // end of Monte Carlo method
+        std::cout << "N=" << N << ", lambda=" << lamb << ", I=" << mc_crude << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
+        std::cout << "Difference is " << fabs(mc_crude-5*pi*pi/(16*16)) << std::endl;
+        std::cout << "Time brute force Monte carlo: " << elapsed_crude_MC.count() << "s" << std::endl;
+    }   // end of brute force Monte Carlo method
 
 
     else if (method=="mc_i"){
-        double mc_int_imp;
-        //std::cout << "N: " << std::endl;
-        //std::cin >> N;
-        N = 100000;
+        std::cout << "Number of integrating points (samples): " << std::endl;
+        std::cin >> N;
 
         srand(time(NULL));// seed random number generator with the time now
-        for (int k=0; k<20; k++){
-            mc_int_imp = monte_carlo_improved(N);
-            std::cout << mc_int_imp << std::endl;
-        }
+        auto start = std::chrono::high_resolution_clock::now();
+        double mc_imp = monte_carlo_improved(N);
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed_improved_MC = finish - start;
+        std::cout << "N=" << N << ", I=" << mc_imp << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
+        std::cout << "Difference is " << fabs(mc_imp-5*pi*pi/(16*16)) << std::endl;
+        std::cout << "Time improved Monte carlo: " << elapsed_improved_MC.count() << "s" << std::endl;
 
-    }
+
+
+    }   // end of improved Monte Carlo method
 
     else {
         std::cout << "No valid method! Try again!" << std::endl;

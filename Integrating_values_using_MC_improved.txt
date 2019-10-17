@@ -1,26 +1,37 @@
 Integrating values using improved Monte Carlo(3d):
-----------------------------------
-N=1000, I=0.194321
+--------------------------------------------------
+Variance=1.02661e-005
+N=1000, I=0.21021
 We want 0.192766
-Difference is 0.00155503
+Difference is 0.0174438
+Time improved Monte carlo: 0.0049801s
 
-N=10000, I=0.182813
+Variance=7.63631e-006
+N=10 000, I=0.201903
 We want 0.192766
-Difference is 0.009953
+Difference is 0.00913724
+Time improved Monte carlo: 0.0259379s
 
-N=100000, I=0.194763
+Variance=7.30424e-006
+N=100 000, I=0.194677
 We want 0.192766
-Difference is 0.00199721
+Difference is 0.00191176
+Time improved Monte carlo: 0.183465s
 
-N=1e+006, I=0.193158
+Variance=6.05281e-006
+N=1 000 000, I=0.191567
 We want 0.192766
-Difference is 0.000392037
+Difference is 0.00119854
+Time improved Monte carlo: 0.772962s
 
-N=1e+007, I=0.19301
+Variance=6.97975e-006
+N=10 000 000, I=0.192498
 We want 0.192766
-Difference is 0.000244109
+Difference is 0.000267352
+Time improved Monte carlo: 7.57271s
 
-N=1e+008, I=0.192676
+Variance=7.09691e-006
+N=100 000 000, I=0.192945
 We want 0.192766
-Difference is 9.0029e-005
-
+Difference is 0.000179596
+Time improved Monte carlo: 74.0251s
