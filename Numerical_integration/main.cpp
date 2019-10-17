@@ -5,6 +5,7 @@
 #include <ctime>
 #include <chrono>
 #include <fstream>
+#include "mpi.h"
 //using namespace std;
 //using namespace arma;
 const double pi = 3.141592653589793238463;
@@ -76,18 +77,27 @@ double p(double y){ // PDF
 // The improved Monte Carlo method. This method has the variables changed to
 // spherical coordinate instead of cartesian.
 double monte_carlo_improved(int N){
-    // N is the number of samples using Monte Carlo
-    double x1, x2, F_tilde, variance;
-    double r1, r2, theta1, theta2, phi1, phi2;
+    int argc;
+    char **argv;
+    MPI_Init(&argc, &argv);
+    std::cout << "aaaa" << std::endl;
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    // Get the rank of the process
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+    double x1,x2,r1,r2,theta1,theta2,phi1,phi2,F_tilde,variance;
     double half_jacobi = 4*pow(pi,4);
     double improved_mc = 0;
     double sigma1 = 0;
     double sigma2 = 0;
-
+    auto start = std::chrono::high_resolution_clock::now();
     // x1 and x2 generates random number between 0 and 1.
     // r, theta and phi is then generated within the respective
     // intervals. Then calculates the integral for each step that will be summarized.
     for (int i=0; i<N; i++){
+        std::cout << "bbb" << std::endl;
         x1 = ran();
         x2 = ran();
         r1 = y(x1);
@@ -100,11 +110,21 @@ double monte_carlo_improved(int N){
         improved_mc += F_tilde;
         sigma1 += F_tilde*F_tilde;
     }
+    auto finish = std::chrono::high_resolution_clock::now();
     sigma1 /= N;
     sigma2 = (improved_mc/N)*(improved_mc/N);
     variance = sigma1 - sigma2;
-    std::cout << "Variance=" << variance << std::endl;
-    improved_mc *= half_jacobi / N;
+    improved_mc *= half_jacobi / (N);
+
+
+    std::chrono::duration<double> elapsed_improved_MC = finish - start;
+    std::cout << "N = "<< N << std::endl;
+    std::cout << "I = " << improved_mc << std::endl;
+    std::cout << "Actual value = " << 5*pi*pi/(16*16) << std::endl;
+    std::cout << "Error = " << fabs( improved_mc - 5*pi*pi/(16*16)) << std::endl;
+    std::cout << "Variance = " << variance << std::endl;
+    std::cout << "Elapsed time:" << elapsed_improved_MC.count() << "s\n" << std::endl;
+    MPI_Finalize();
     return improved_mc;
 } // end of function mc_improved()
 
@@ -117,10 +137,11 @@ double brute_monte_carlo(int N, double a, double b){
 
          double func, variance;
          double x1, y1, z1, x2, y2, z2;
-         double crude_mc = 0;
-         double sigma1 = 0;
-         double sigma2 = 0;
-         //arma::vec <double> x_arr = arma::vec(N);
+         crude_mc = sum_sigma = 0.;
+         double jacobi = pow((b-a),6);
+         auto start = std::chrono::high_resolution_clock::now();
+         for (int i = 0; i < n; i++){
+           //srand(time(NULL));// seed random number generator with the time now
 
          double jacobi = pow((b-a),6);
          for (int i = 0; i < N; i++){
@@ -135,19 +156,20 @@ double brute_monte_carlo(int N, double a, double b){
            crude_mc  += func;
            sigma1 += func*func;
          }
-         sigma1 /= N;
-         sigma2 = (crude_mc/N)*(crude_mc/N);
-         variance = jacobi*(sigma1 - sigma2);
-         std::cout << "Variance=" << variance << std::endl;
-         crude_mc = crude_mc * jacobi / N;
-         return crude_mc;
+         crude_mc = crude_mc/((double) n)*jacobi;
+         sum_sigma = sum_sigma/((double) n);
+         variance = sum_sigma - crude_mc * crude_mc;
+         auto finish = std::chrono::high_resolution_clock::now();
+         std::chrono::duration<double> elapsed_crude_MC = finish - start;
+         std::cout << "N = "<< n << " \nI = " << crude_mc << std::endl;
+         std::cout << "Variance = "<< variance << std::endl;
+         std::cout << "Actual value = " << 5*pi*pi/(16*16) << "Error = " << fabs( crude_mc - 5*pi*pi/(16*16)) << std::endl;
+         std::cout << "Elapsed time:" << elapsed_crude_MC.count() << "\n" << std::endl;
+
+           return crude_mc;
          } // end of function brute_monte_carlo
 
 
-// gauss_legendre() + gauss_laguerre() + gammln() = 99% kopi av Morten sin kode
-
-// Function using Gauss-Legendre quadrature to find
-// the weight function and the smooth function.
 void gauss_legendre(double x1, double x2, double x[], double w[], int N)
 {
    int         m,j,i;
@@ -378,7 +400,7 @@ int main(){
         std::cin >> N;
         std::cout << "Limits of integrations (start = -end): " << std::endl;
         std::cin >> lamb;
-
+        std::cout << "integrating values using brute force Monte-carlo integration\n-------------------------------------------\n";
         srand(time(NULL));// seed random number generator with the time now
         auto start = std::chrono::high_resolution_clock::now();
         double mc_crude = brute_monte_carlo(N, -lamb, lamb);
