@@ -77,15 +77,14 @@ double p(double y){ // PDF
 // The improved Monte Carlo method. This method has the variables changed to
 // spherical coordinate instead of cartesian.
 double monte_carlo_improved(int N){
-    int argc;
-    char **argv;
-    MPI_Init(&argc, &argv);
-    std::cout << "aaaa" << std::endl;
-    int world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    //int argc;
+    //char **argv;
+    //MPI_Init(&argc, &argv);
+    //int world_size;
+    //MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     // Get the rank of the process
-    int world_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    //int world_rank;
+    //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
     double x1,x2,r1,r2,theta1,theta2,phi1,phi2,F_tilde,variance;
     double half_jacobi = 4*pow(pi,4);
@@ -97,7 +96,6 @@ double monte_carlo_improved(int N){
     // r, theta and phi is then generated within the respective
     // intervals. Then calculates the integral for each step that will be summarized.
     for (int i=0; i<N; i++){
-        std::cout << "bbb" << std::endl;
         x1 = ran();
         x2 = ran();
         r1 = y(x1);
@@ -124,7 +122,7 @@ double monte_carlo_improved(int N){
     std::cout << "Error = " << fabs( improved_mc - 5*pi*pi/(16*16)) << std::endl;
     std::cout << "Variance = " << variance << std::endl;
     std::cout << "Elapsed time:" << elapsed_improved_MC.count() << "s\n" << std::endl;
-    MPI_Finalize();
+    //MPI_Finalize();
     return improved_mc;
 } // end of function mc_improved()
 
@@ -141,10 +139,10 @@ double brute_monte_carlo(int N, double a, double b){
          double sigma1 = 0;
          double jacobi = pow((b-a),6);
          auto start = std::chrono::high_resolution_clock::now();
-         for (int i = 0; i < N; i++){
+         //for (int i = 0; i < N; i++){
            //srand(time(NULL));// seed random number generator with the time now
 
-         double jacobi = pow((b-a),6);
+         //double jacobi = pow((b-a),6);
          for (int i = 0; i < N; i++){
            //initialize the random numbers
            x1 =  ran()*(b-a)+a;
@@ -304,16 +302,20 @@ void write_to_file(){
 
 
 
-int main(){
+int main(int nargs, char* args[]){
     int N;
     double lamb;
+    MPI_Init(&nargs, &args);
+    int numprocs, my_rank;
+    MPI_Comm_size (MPI_COMM_WORLD, &numprocs);
+    MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
 
     //write_to_file();
 
     std::string method;
-    std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
-    std::cin >> method;
-    //method = "mc";
+    //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
+    //std::cin >> method;
+    method = "mc_i";
 
 
     if (method=="le"){
@@ -436,6 +438,6 @@ int main(){
     }
 
 
-
+    MPI_Finalize ();
     return 0;
 }   // end of main
