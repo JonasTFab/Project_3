@@ -77,6 +77,8 @@ double p(double y){ // PDF
 // The improved Monte Carlo method. This method has the variables changed to
 // spherical coordinate instead of cartesian.
 double monte_carlo_improved(int N){
+
+
     //int argc;
     //char **argv;
     //MPI_Init(&argc, &argv);
@@ -116,6 +118,7 @@ double monte_carlo_improved(int N){
 
 
     std::chrono::duration<double> elapsed_improved_MC = finish - start;
+
     std::cout << "N = "<< N << std::endl;
     std::cout << "I = " << improved_mc << std::endl;
     std::cout << "Actual value = " << 5*pi*pi/(16*16) << std::endl;
@@ -305,13 +308,15 @@ void write_to_file(){
 int main(int nargs, char* args[]){
     int N;
     double lamb;
-    MPI_Init(&nargs, &args);
-    int numprocs, my_rank;
-    MPI_Comm_size (MPI_COMM_WORLD, &numprocs);
-    MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
+    if (nargs > 1){
+      N = atoi(args[1]);
+    } else {
+      std::cout << "need N" << std::endl;
+      return 1;
+    }
+
 
     //write_to_file();
-
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
     //std::cin >> method;
@@ -416,17 +421,27 @@ int main(int nargs, char* args[]){
 
 
     else if (method=="mc_i"){
-        std::cout << "Number of integrating points (samples): " << std::endl;
-        std::cin >> N;
 
-        srand(time(NULL));// seed random number generator with the time now
-        auto start = std::chrono::high_resolution_clock::now();
+        MPI_Init(&nargs, &args);
+        int numprocs, my_rank;
+        MPI_Comm_size (MPI_COMM_WORLD, &numprocs);
+        MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
+        std::cout << "Number of integrating points (samples): " << std::endl;
+        // std::cin >> N;
+        if(my_rank>0){
+          srand(pow(time(NULL),2));
+        }
+        else{
+          srand(time(NULL));
+        }
+        //srand(time(NULL));// seed random number generator with the time now
+        //auto start = std::chrono::high_resolution_clock::now();
         double mc_imp = monte_carlo_improved(N);
-        auto finish = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed_improved_MC = finish - start;
-        std::cout << "N=" << N << ", I=" << mc_imp << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
-        std::cout << "Difference is " << fabs(mc_imp-5*pi*pi/(16*16)) << std::endl;
-        std::cout << "Time improved Monte carlo: " << elapsed_improved_MC.count() << "s" << std::endl;
+        //auto finish = std::chrono::high_resolution_clock::now();
+        //std::chrono::duration<double> elapsed_improved_MC = finish - start;
+        //std::cout << "N=" << N << ", I=" << mc_imp << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
+        //std::cout << "Difference is " << fabs(mc_imp-5*pi*pi/(16*16)) << std::endl;
+        //std::cout << "Time improved Monte carlo: " << elapsed_improved_MC.count() << "s" << std::endl;
 
 
 
