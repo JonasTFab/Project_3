@@ -13,7 +13,6 @@ const double eps = 1e-8;
 const double eps2 = 3e-14;
 const int max = 10;
 
-
 //using namespace std;
 //using namespace arma;
 
@@ -113,18 +112,18 @@ double monte_carlo_improved(int N){
     auto finish = std::chrono::high_resolution_clock::now();
     sigma1 /= N;
     sigma2 = (improved_mc/N)*(improved_mc/N);
-    variance = sigma1 - sigma2;
+    variance = half_jacobi*(sigma1 - sigma2);
     improved_mc *= half_jacobi / (N);
 
 
     std::chrono::duration<double> elapsed_improved_MC = finish - start;
 
-    std::cout << "N = "<< N << std::endl;
-    std::cout << "I = " << improved_mc << std::endl;
-    std::cout << "Actual value = " << 5*pi*pi/(16*16) << std::endl;
-    std::cout << "Error = " << fabs( improved_mc - 5*pi*pi/(16*16)) << std::endl;
-    std::cout << "Variance = " << variance << std::endl;
-    std::cout << "Elapsed time:" << elapsed_improved_MC.count() << "s\n" << std::endl;
+    //std::cout << "N = "<< N << std::endl;
+    //std::cout << "I = " << improved_mc << std::endl;
+    //std::cout << "Actual value = " << 5*pi*pi/(16*16) << std::endl;
+    //std::cout << "Error = " << fabs( improved_mc - 5*pi*pi/(16*16)) << std::endl;
+    //std::cout << "Variance = " << variance << std::endl;
+    //std::cout << "Elapsed time:" << elapsed_improved_MC.count() << "s\n" << std::endl;
     //MPI_Finalize();
     return improved_mc;
 } // end of function mc_improved()
@@ -436,15 +435,31 @@ int main(int nargs, char* args[]){
         }
         //srand(time(NULL));// seed random number generator with the time now
         //auto start = std::chrono::high_resolution_clock::now();
-        double mc_imp = monte_carlo_improved(N);
+        double mc_imp;
+        for(int i = 1; i <=N; i++){
+          auto start = std::chrono::high_resolution_clock::now();
+          mc_imp = monte_carlo_improved(pow(10,i)/2); //divide the number of iterations on two processors
+
+          double paralell_sum;
+          MPI_Reduce(&mc_imp, & paralell_sum, 1, MPI_DOUBLE, MPI_SUM, 0,
+             MPI_COMM_WORLD);//Sum of results from two threads
+          if (my_rank == 0){
+            paralell_sum = paralell_sum/2;
+          auto finish = std::chrono::high_resolution_clock::now();
+          std::chrono::duration<double> elapsed_para_MC = finish - start;
+          std::cout << "Number of simulations:" << pow(10,i) << std::endl;
+          std::cout << "I = " << paralell_sum << " Error = " << fabs(paralell_sum-5*pi*pi/(16*16)) << std::endl;
+          std::cout << "Real Time with parallization monte carlo: " << elapsed_para_MC.count() << "s" << std::endl;
+
+        }
+        }
+
         //auto finish = std::chrono::high_resolution_clock::now();
         //std::chrono::duration<double> elapsed_improved_MC = finish - start;
         //std::cout << "N=" << N << ", I=" << mc_imp << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         //std::cout << "Difference is " << fabs(mc_imp-5*pi*pi/(16*16)) << std::endl;
         //std::cout << "Time improved Monte carlo: " << elapsed_improved_MC.count() << "s" << std::endl;
-
-
-
+        MPI_Finalize ();
     }   // end of improved Monte Carlo method
 
     else {
@@ -452,7 +467,5 @@ int main(int nargs, char* args[]){
         return 0;
     }
 
-
-    MPI_Finalize ();
     return 0;
 }   // end of main
