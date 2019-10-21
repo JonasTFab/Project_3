@@ -23,3 +23,4 @@ Time using Gauss-Laguerre method: 112.437s
 N=30, I=0.192114
 We want 0.192766
 Difference is 0.000652004
+Time using Gauss-Laguerre method: 337.923s
