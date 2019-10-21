@@ -4,34 +4,34 @@ Variance=1.02661e-005
 N=1000, I=0.21021
 We want 0.192766
 Difference is 0.0174438
-Time improved Monte carlo: 0.0049801s
+Time improved Monte carlo: 0.000517s
 
 Variance=7.63631e-006
 N=10 000, I=0.201903
 We want 0.192766
 Difference is 0.00913724
-Time improved Monte carlo: 0.0259379s
+Time improved Monte carlo: 0.003524s
 
 Variance=7.30424e-006
 N=100 000, I=0.194677
 We want 0.192766
 Difference is 0.00191176
-Time improved Monte carlo: 0.183465s
+Time improved Monte carlo: 0.026533s
 
 Variance=6.05281e-006
 N=1 000 000, I=0.191567
 We want 0.192766
 Difference is 0.00119854
-Time improved Monte carlo: 0.772962s
+Time improved Monte carlo: 0.247553s
 
 Variance=6.97975e-006
 N=10 000 000, I=0.192498
 We want 0.192766
 Difference is 0.000267352
-Time improved Monte carlo: 7.57271s
+Time improved Monte carlo: 2.47919s
 
 Variance=7.09691e-006
 N=100 000 000, I=0.192945
 We want 0.192766
 Difference is 0.000179596
-Time improved Monte carlo: 74.0251s
+Time improved Monte carlo: 24.7062s

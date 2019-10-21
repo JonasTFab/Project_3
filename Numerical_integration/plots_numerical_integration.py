@@ -96,32 +96,32 @@ print(trout)"""
 ####### Plots of Legendre and Laguerre ############
 ###################################################
 
+I_exact = 0.192766
 N = np.array([10,15,20,25,30])
 
 I_le = np.array([0.11204,0.208919,0.172009,0.190286,0.183952])
 t_le = np.array([0.106745,0.856705,4.09135,15.8739,47.7655])
 diff_le = np.array([0.0807253,0.0161529,0.0207566,0.0024796,0.00881355])
+rel_error_le = (I_le-I_exact)/I_exact
 
 I_la = np.array([0.186457,0.189759,0.191082,0.191741,0.192114])
 t_la = np.array([0.565461,5.45619,30.8584,113.847,341.753])
 diff_la = np.array([0.00630838,0.00300674,0.00168394,0.00102497,0.000652004])
-
-
-I_exact = 0.192766
+rel_error_la = (I_la-I_exact)/I_exact
 
 plt.subplot(121); plt.grid()
 plt.title("Quadrature methods including exact solution")
-plt.plot(N,I_le,label="Integral of Gauss-Legendre")
-plt.plot(N,I_la,label="Integral of Gauss-Laguerre")
-plt.plot([min(N),max(N)],[I_exact,I_exact],label="Exact integral")
+plt.plot(N,I_le,"--o",label="Integral of Gauss-Legendre",color="red")
+plt.plot(N,I_la,"--^",label="Integral of Gauss-Laguerre",color="blue")
+plt.plot([min(N),max(N)],[I_exact,I_exact],"--",label="Exact integral",color="black")
 plt.xlabel("Number of integration points (N)"); plt.ylabel("Integral (I)")
 plt.legend()
 
 plt.subplot(122); plt.grid()
-plt.title("Integration efficiency with N=10,15,20,25,30")
-plt.plot(t_le,diff_le,label="Efficiency of Gauss-Legendre")
-plt.plot(t_la,diff_la,label="Efficiency of Gauss-Laguerre")
-plt.xlabel("Time taken (s)"); plt.ylabel("Difference from exact integral (I-I_calc)")
+plt.title("Efficiency with N=10,15,20,25,30")
+plt.plot(t_le,rel_error_le,"--o",label="Efficiency of Gauss-Legendre",color="red")
+plt.plot(t_la,rel_error_la,"--^",label="Efficiency of Gauss-Laguerre",color="blue")
+plt.xlabel("Time taken (s)"); plt.ylabel("Relative error (I_calc-I_exact)/I_exact")
 plt.legend()
 
 plt.show()
