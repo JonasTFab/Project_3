@@ -17,6 +17,26 @@ const int max = 10;
 //using namespace arma;
 
 
+
+/*################## Basic info about our code #########################
+
+This code implements different methods to integrate a spesific function.
+The methods can be found as <double> functions with their respective name.
+Every function is called inside the main class. Also, both Gauss-Legendre
+and brute Monte Carlo uses the function called integrating_function as they
+use plain cartesian coordinates. Gauss-Laguerre and improved Monte Carlo
+depends on spherical coordinates which is then given the function called
+int_func_spherical_coord. gammln() is needed for gauss_laguerre() to work
+properly. When running the file, the main() will ask for an input which
+corresponds the method one wants to use. Follow the instructions that
+pops up when running the code and you will be directed to the desired
+method.
+*/
+
+
+
+
+// Function we want to integrate
 double integrating_function(double x1, double y1, double z1, double x2, double y2, double z2){
     int alpha = 2;
     double r1, r2, r_diff;
@@ -33,6 +53,7 @@ double integrating_function(double x1, double y1, double z1, double x2, double y
 } // end of integrating_function
 
 
+// Same function as over but with spherical coordinates
 double int_func_spherical_coord(double r1, double r2, double theta1, double theta2, double phi1, double phi2){
     int alpha = 2;
     double cos_beta = cos(theta1)*cos(theta2) + sin(theta1)*sin(theta2)*cos(phi1-phi2);
@@ -68,7 +89,7 @@ double y(double x){ // cumulative function
     return -log(1-x)/4;
 }
 
-double p(double y){ // PDF
+double p(double y){ // radial PDF
     return 4*exp(-4*y);
 }
 
@@ -76,17 +97,6 @@ double p(double y){ // PDF
 // The improved Monte Carlo method. This method has the variables changed to
 // spherical coordinate instead of cartesian.
 double monte_carlo_improved(int N){
-
-
-    //int argc;
-    //char **argv;
-    //MPI_Init(&argc, &argv);
-    //int world_size;
-    //MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    // Get the rank of the process
-    //int world_rank;
-    //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-
     double x1,x2,r1,r2,theta1,theta2,phi1,phi2,F_tilde,variance;
     double half_jacobi = 4*pow(pi,4);
     double improved_mc = 0;
@@ -116,15 +126,7 @@ double monte_carlo_improved(int N){
     improved_mc *= half_jacobi / (N);
 
 
-    std::chrono::duration<double> elapsed_improved_MC = finish - start;
-
-    //std::cout << "N = "<< N << std::endl;
-    //std::cout << "I = " << improved_mc << std::endl;
-    //std::cout << "Actual value = " << 5*pi*pi/(16*16) << std::endl;
-    //std::cout << "Error = " << fabs( improved_mc - 5*pi*pi/(16*16)) << std::endl;
-    //std::cout << "Variance = " << variance << std::endl;
-    //std::cout << "Elapsed time:" << elapsed_improved_MC.count() << "s\n" << std::endl;
-    //MPI_Finalize();
+    std::cout << "Variance = " << variance << std::endl;
     return improved_mc;
 } // end of function mc_improved()
 
@@ -141,10 +143,7 @@ double brute_monte_carlo(int N, double a, double b){
          double sigma1 = 0;
          double jacobi = pow((b-a),6);
          auto start = std::chrono::high_resolution_clock::now();
-         //for (int i = 0; i < N; i++){
-           //srand(time(NULL));// seed random number generator with the time now
 
-         //double jacobi = pow((b-a),6);
          for (int i = 0; i < N; i++){
            //initialize the random numbers
            x1 =  ran()*(b-a)+a;
@@ -307,12 +306,6 @@ void write_to_file(){
 int main(int nargs, char* args[]){
     int N;
     double lamb;
-    if (nargs > 1){
-      N = atoi(args[1]);
-    } else {
-      std::cout << "need N" << std::endl;
-      return 1;
-    }
 
 
     //write_to_file();
@@ -421,12 +414,19 @@ int main(int nargs, char* args[]){
 
     else if (method=="mc_i"){
 
+        if (nargs > 1){
+          N = atoi(args[1]);
+        } else {
+          std::cout << "need N" << std::endl;
+          return 1;
+        }
+
         MPI_Init(&nargs, &args);
         int numprocs, my_rank;
         MPI_Comm_size (MPI_COMM_WORLD, &numprocs);
         MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
         std::cout << "Number of integrating points (samples): " << std::endl;
-        // std::cin >> N;
+        std::cin >> N;
         if(my_rank>0){
           srand(pow(time(NULL),2));
         }
@@ -454,11 +454,11 @@ int main(int nargs, char* args[]){
         }
         }
 
-        //auto finish = std::chrono::high_resolution_clock::now();
-        //std::chrono::duration<double> elapsed_improved_MC = finish - start;
-        //std::cout << "N=" << N << ", I=" << mc_imp << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
-        //std::cout << "Difference is " << fabs(mc_imp-5*pi*pi/(16*16)) << std::endl;
-        //std::cout << "Time improved Monte carlo: " << elapsed_improved_MC.count() << "s" << std::endl;
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed_improved_MC = finish - start;
+        std::cout << "N=" << N << ", I=" << mc_imp << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
+        std::cout << "Difference is " << fabs(mc_imp-5*pi*pi/(16*16)) << std::endl;
+        std::cout << "Time improved Monte carlo: " << elapsed_improved_MC.count() << "s" << std::endl;
         MPI_Finalize ();
     }   // end of improved Monte Carlo method
 
