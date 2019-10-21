@@ -3,19 +3,24 @@ Integrating values using Legendre (3a):
 N=10, lambda=2.3, I=0.11204
 We want 0.192766
 Difference is 0.0807253
+Time using Gauss-Legendre method: 0.109703s
 
 N=15, lambda=2.3, I=0.208919
 We want 0.192766
 Difference is 0.0161529
+Time using Gauss-Legendre method: 0.72408s
 
 N=20, lambda=2.3, I=0.172009
 We want 0.192766
 Difference is 0.0207566
+Time using Gauss-Legendre method: 4.14187s
 
 N=25, lambda=2.3, I=0.190286
 We want 0.192766
 Difference is 0.0024796
+Time using Gauss-Legendre method: 15.6751s
 
 N=30, lambda=2.3, I=0.183952
 We want 0.192766
 Difference is 0.00881355
+Time using Gauss-Legendre method: 46.3422s

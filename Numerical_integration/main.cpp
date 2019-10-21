@@ -5,9 +5,8 @@
 #include <ctime>
 #include <chrono>
 #include <fstream>
-#include "mpi.h"
-//using namespace std;
-//using namespace arma;
+//#include "mpi.h"
+
 const double pi = 3.141592653589793238463;
 const double eps = 1e-8;
 const double eps2 = 3e-14;
@@ -102,7 +101,6 @@ double monte_carlo_improved(int N){
     double improved_mc = 0;
     double sigma1 = 0;
     double sigma2 = 0;
-    auto start = std::chrono::high_resolution_clock::now();
     // x1 and x2 generates random number between 0 and 1.
     // r, theta and phi is then generated within the respective
     // intervals. Then calculates the integral for each step that will be summarized.
@@ -119,7 +117,6 @@ double monte_carlo_improved(int N){
         improved_mc += F_tilde;
         sigma1 += F_tilde*F_tilde;
     }
-    auto finish = std::chrono::high_resolution_clock::now();
     sigma1 /= N;
     sigma2 = (improved_mc/N)*(improved_mc/N);
     variance = half_jacobi*(sigma1 - sigma2);
@@ -142,7 +139,6 @@ double brute_monte_carlo(int N, double a, double b){
          double crude_mc = 0;
          double sigma1 = 0;
          double jacobi = pow((b-a),6);
-         auto start = std::chrono::high_resolution_clock::now();
 
          for (int i = 0; i < N; i++){
            //initialize the random numbers
@@ -159,12 +155,7 @@ double brute_monte_carlo(int N, double a, double b){
          crude_mc = crude_mc/((double) N)*jacobi;
          sigma1 /= N;
          variance = sigma1 - crude_mc * crude_mc;
-         auto finish = std::chrono::high_resolution_clock::now();
-         std::chrono::duration<double> elapsed_crude_MC = finish - start;
-         std::cout << "N = "<< N << " \nI = " << crude_mc << std::endl;
          std::cout << "Variance = "<< variance << std::endl;
-         std::cout << "Actual value = " << 5*pi*pi/(16*16) << "Error = " << fabs( crude_mc - 5*pi*pi/(16*16)) << std::endl;
-         std::cout << "Elapsed time:" << elapsed_crude_MC.count() << "\n" << std::endl;
 
            return crude_mc;
          } // end of function brute_monte_carlo
@@ -303,7 +294,8 @@ void write_to_file(){
 
 
 
-int main(int nargs, char* args[]){
+//int main(int nargs, char* args[]){
+int main(){
     int N;
     double lamb;
 
@@ -312,7 +304,7 @@ int main(int nargs, char* args[]){
     std::string method;
     //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
     //std::cin >> method;
-    method = "mc_i";
+    method = "la";
 
 
     if (method=="le"){
@@ -325,10 +317,10 @@ int main(int nargs, char* args[]){
         // Gauss-Legendre quadrature function.
         double *x = new double [N];
         double *W = new double [N];
-
         gauss_legendre(-lamb, lamb, x, W, N);
         double int_gauss_legendre = 0;
 
+        auto start = std::chrono::high_resolution_clock::now();
         // Runs through N^6 operations to estimate the integral
         for (int i1 = 0; i1 < N; i1++){
             for (int i2 = 0; i2 < N; i2++){
@@ -344,9 +336,12 @@ int main(int nargs, char* args[]){
                 }
             }
         }
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed_gauleg = finish - start;
 
         std::cout << "N=" << N << ", lambda=" << lamb << ", I=" << int_gauss_legendre << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(int_gauss_legendre-5*pi*pi/(16*16)) << std::endl;
+        std::cout << "Time using Gauss-Legendre method: " << elapsed_gauleg.count() << "s" << std::endl;
 
     } // end of Legendre method
 
@@ -370,6 +365,7 @@ int main(int nargs, char* args[]){
         gauss_legendre(0, 2*pi, xp, Wp, N);
         gauss_laguerre(xgl, Wgl, N, alf);
 
+        auto start = std::chrono::high_resolution_clock::now();
         // Runs through N^6 operations to estimate the integral
         double int_gauss_laguerre = 0;
         for (int i1 = 1; i1 <= N; i1++){
@@ -387,9 +383,12 @@ int main(int nargs, char* args[]){
                 }
             }
         }
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed_gaulag = finish - start;
 
         std::cout << "N=" << N << ", I=" << int_gauss_laguerre << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(int_gauss_laguerre-5*pi*pi/(16*16)) << std::endl;
+        std::cout << "Time using Gauss-Laguerre method: " << elapsed_gaulag.count() << "s" << std::endl;
 
 
     } // end of Laguerre method
@@ -412,6 +411,7 @@ int main(int nargs, char* args[]){
     }   // end of brute force Monte Carlo method
 
 
+/*
     else if (method=="mc_i"){
 
         if (nargs > 1){
@@ -433,8 +433,7 @@ int main(int nargs, char* args[]){
         else{
           srand(time(NULL));
         }
-        //srand(time(NULL));// seed random number generator with the time now
-        //auto start = std::chrono::high_resolution_clock::now();
+
         double mc_imp;
         for(int i = 1; i <=N; i++){
           auto start = std::chrono::high_resolution_clock::now();
@@ -445,22 +444,21 @@ int main(int nargs, char* args[]){
              MPI_COMM_WORLD);//Sum of results from two threads
           if (my_rank == 0){
             paralell_sum = paralell_sum/2;
-          auto finish = std::chrono::high_resolution_clock::now();
-          std::chrono::duration<double> elapsed_para_MC = finish - start;
-          std::cout << "Number of simulations:" << pow(10,i) << std::endl;
-          std::cout << "I = " << paralell_sum << " Error = " << fabs(paralell_sum-5*pi*pi/(16*16)) << std::endl;
-          std::cout << "Real Time with parallization monte carlo: " << elapsed_para_MC.count() << "s" << std::endl;
+              auto finish = std::chrono::high_resolution_clock::now();
+              std::chrono::duration<double> elapsed_para_MC = finish - start;
+              std::cout << "Number of simulations:" << pow(10,i) << std::endl;
+              std::cout << "I = " << paralell_sum << " Error = " << fabs(paralell_sum-5*pi*pi/(16*16)) << std::endl;
+              std::cout << "Real Time with parallization monte carlo: " << elapsed_para_MC.count() << "s" << std::endl;
 
         }
         }
 
-        auto finish = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed_improved_MC = finish - start;
         std::cout << "N=" << N << ", I=" << mc_imp << std::endl << "We want " << 5*pi*pi/(16*16) << std::endl;
         std::cout << "Difference is " << fabs(mc_imp-5*pi*pi/(16*16)) << std::endl;
         std::cout << "Time improved Monte carlo: " << elapsed_improved_MC.count() << "s" << std::endl;
         MPI_Finalize ();
     }   // end of improved Monte Carlo method
+*/
 
     else {
         std::cout << "No valid method! Try again!" << std::endl;
