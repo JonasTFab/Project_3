@@ -54,12 +54,12 @@ plt.ylabel("Absolute Error log10(AbsError)")
 plt.grid()
 plt.legend()
 plt.show()
-
-plt.plot(improved_time,improved_error)
-plt.plot(brute_force_time,brute_force_error)
+plt.close('all')
+#plt.plot(improved_time,improved_error)
+#plt.plot(brute_force_time,brute_force_error)
 
 #plt.show()
-
+#plt.close()
 """K = 273.15
 C_0 = 5567.11
 T_0 = 0+K
