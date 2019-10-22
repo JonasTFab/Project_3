@@ -99,7 +99,7 @@ plt.legend()
 plt.subplot(122); plt.grid()
 plt.title("Efficiency with N=10,15,20,25,30")
 plt.plot(t_le,rel_error_le,"--o",label="Efficiency of Gauss-Legendre",color="red")
-plt.plot(t_la,rel_error_la,"--^",label="Efficiency of Gauss-Laguerre",color="blue")
+plt.plot(t_la[:-2],rel_error_la[:-2],"--^",label="Efficiency of Gauss-Laguerre",color="blue")
 plt.xlabel("Time taken (s)"); plt.ylabel("Relative error (I_calc-I_exact)/I_exact")
 plt.legend()
 
