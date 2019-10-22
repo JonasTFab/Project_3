@@ -302,9 +302,9 @@ int main(){
 
     //write_to_file();
     std::string method;
-    //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
-    //std::cin >> method;
-    method = "la";
+    std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
+    std::cin >> method;
+    //method = "la";
 
 
     if (method=="le"){
@@ -467,3 +467,7 @@ int main(){
 
     return 0;
 }   // end of main
+
+
+//mpicxx  -o main_mpi.x  main.cpp -std=c++11
+//mpiexec -n 2 ./main_mpi.x 8
