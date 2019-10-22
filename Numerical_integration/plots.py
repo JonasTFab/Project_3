@@ -5,6 +5,7 @@ import numpy as np
 ###Plots of improvement through parallization and optimization######
 ####################################################################
 
+"""
 n = np.array([100,1000,10000,100000,1000000,10000000,100000000])
 improved_time = np.array([6.673e-05,0.00051678,0.00352412,0.0265326, 0.247553, 2.47919, 24.7062])
 only_paralell_time = np.array([0.000104346,0.000219668,0.0012813,0.0122907,0.127039,1.22464,12.3421])/improved_time
@@ -83,9 +84,9 @@ plt.show()
 #plt.plot(brute_force_time,brute_force_error)
 #plt.show()
 
-#################################################################################
-########################Plot error as function as time brute force mc###########################
-#################################################################################
+###########################################################################################
+########################Plot error as function as time brute force mc######################
+###########################################################################################
 
 brute_force_time = np.array([1.9837e-05,0.00022733,0.00205109,0.0120933,0.104968,1.02758,10.2804])#time in seconds to complete the algorithm
 brute_force_error = np.array([0.173965,0.0568929,0.0860584,0.0679437,0.0849495,0.0101632,0.0042974])#error
@@ -143,3 +144,34 @@ plt.plot(t_la[:-2],rel_error_la[:-2],"--^",label="Efficiency of Gauss-Laguerre",
 plt.xlabel("Time taken (s)"); plt.ylabel("Relative error (I_calc-I_exact)/I_exact")
 plt.legend()
 plt.show()
+
+"""
+###########################################################
+####### Plots of the variance in BFMC and ISMC ############
+###########################################################
+
+N = np.array([1e3,1e4,1e5,1e6,1e7,1e8])
+var_BF = np.array([0.00103337,0.00001084,0.000440542,0.000957938,0.00910813,0.0100356])
+var_IS = np.array([0.772294,1.28717,2.22663,2.21623,2.31335,2.26628])
+
+plt.subplot(211)
+plt.loglog(N,var_BF,label="Variance, brute force")
+plt.grid(); plt.legend()
+plt.title("Variance for increasing N (brute force)")
+plt.xlabel("Mesh grid (N)"); plt.ylabel("Variance")
+
+plt.subplot(212)
+plt.loglog(N,var_IS,label="Variance, imortance sampling")
+plt.grid(); plt.legend()
+plt.title("Variance for increasing N (importance sampling)")
+plt.xlabel("Mesh grid (N)"); plt.ylabel("Variance")
+plt.show()
+
+
+
+
+
+
+
+
+#
