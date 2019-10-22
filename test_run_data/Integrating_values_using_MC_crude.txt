@@ -4,28 +4,34 @@ N=1000, lambda=5, I=0.00375731
 We want 0.192766
 Difference is 0.189008
 Time brute force Monte carlo: 0.0010471s
+Variance = 0.000091
 
 N=10 000, lambda=5, I=0.0524968
 We want 0.192766
 Difference is 0.140269
 Time brute force Monte carlo: 0.0059802s
+Variance = 0.00196108
 
 N=100 000, lambda=5, I=0.148791
 We want 0.192766
 Difference is 0.0439744
 Time brute force Monte carlo: 0.0568843s
+Variance = 0.00132499
 
 N=1 000 000, lambda=5, I=0.35876
 We want 0.192766
 Difference is 0.165994
 Time brute force Monte carlo: 0.2354s
+Variance = 0.00861896
 
 N=10 000 000, lambda=5, I=0.243902
 We want 0.192766
 Difference is 0.0511367
 Time brute force Monte carlo: 1.97176s
+Variance = 0.00283979
 
 N=100 000 000, lambda=5, I=0.192902
 We want 0.192766
 Difference is 0.000136158
 Time brute force Monte carlo: 18.7489s
+Variance = 0.00832801
