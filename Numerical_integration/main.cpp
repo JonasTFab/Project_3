@@ -101,7 +101,7 @@ double monte_carlo_improved(int N){
     double improved_mc = 0;
     double variance = 0;
     double mu = 0;
-    arma::Col<double> f_x_i = arma::vec(N);
+    arma::Col<double> fx = arma::vec(N);
     arma::Col<double> pr_pr = arma::vec(N);
 
     // x1 and x2 generates random number between 0 and 1.
@@ -119,17 +119,18 @@ double monte_carlo_improved(int N){
         pr_pr(i) = p(r1) * p(r2);
         func = int_func_spherical_coord(r1,r2,theta1,theta2,phi1,phi2);
         improved_mc += r1*r1*r2*r2*sin(theta1)*sin(theta2) * func / ((double) pr_pr(i));
-        mu += r1*r2*theta1*theta2*phi1*phi2 * pr_pr(i);
-        f_x_i(i) = func;
+        mu += func;
+        fx(i) = func;
+
     }
 
-    mu *= 1/(half_jacobi);
+    mu *= 1/((double) N);
     for (int i=0;i<N;i++){
-         variance += pow(f_x_i(i)-mu,2);
+         variance += pow(fx(i)-mu,2);
     }
 
-    half_jacobi2 = sum(pr_pr)/ ((double) N);
-    variance *= half_jacobi / ((double) N*half_jacobi2);
+    half_jacobi2 = sum(pr_pr) / ((double) N);
+    variance *= half_jacobi2 / ((double) N * half_jacobi);
 
     improved_mc *= half_jacobi / ((double) N);
 
@@ -151,7 +152,7 @@ double brute_monte_carlo(int N, double a, double b){
          double mu = 0;
          double variance = 0;
          double jacobi = pow((b-a),6);
-         arma::Col<double> f_x_i = arma::vec(N);
+         arma::Col<double> fx = arma::vec(N);
 
          for (int i = 0; i < N; i++){
            //initialize the random numbers
@@ -163,20 +164,21 @@ double brute_monte_carlo(int N, double a, double b){
            z2 =  ran()*(b-a)+a;
            func = integrating_function(x1,y1,z1,x2,y2,z2);
            crude_mc  += func;
-           mu += x1*y1*x2*y2*z1*z2;
-           f_x_i(i) = func;
+           mu += func;
+           fx(i) = func;
         }
 
-        mu *= 1/(jacobi*N);
+        mu *= 1/((double) N);
         for (int i=0;i<N;i++){
-             variance += pow(f_x_i(i)-mu,2);
+             variance += pow(fx(i)-mu,2);
         }
 
-        crude_mc = crude_mc/((double) N)*jacobi;
+        crude_mc = crude_mc*jacobi / ((double) N);
         variance *= jacobi/((double) N);
         std::cout << "Variance = "<< variance << std::endl;
 
         return crude_mc;
+
         } // end of function brute_monte_carlo
 
 
@@ -305,9 +307,9 @@ int main(){
 
     //write_to_file();
     std::string method;
-    //std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
-    //std::cin >> method;
-    method = "mc_i";
+    std::cout << "which method (Legendre(le), Laguerre(la), Monte Carlo(mc), improved Monte Carlo(mc_i))? " << std::endl;
+    std::cin >> method;
+    //method = "mc_i";
 
 
     if (method=="le"){
@@ -400,9 +402,9 @@ int main(){
     else if (method=="mc"){
         std::cout << "Number of integrating points (samples): " << std::endl;
         std::cin >> N;
-        //std::cout << "Limits of integrations (start = -end): " << std::endl;
-        //std::cin >> lamb;
-        lamb=5;
+        std::cout << "Limits of integrations (start = -end): " << std::endl;
+        std::cin >> lamb;
+
         std::cout << "integrating values using brute force Monte-carlo integration\n-------------------------------------------\n";
         srand(time(NULL));// seed random number generator with the time now
         auto start = std::chrono::high_resolution_clock::now();
@@ -472,6 +474,7 @@ int main(){
         std::cin >> N;
 
         double mc_imp;
+        srand(time(NULL));// seed random number generator with the time now
         auto start = std::chrono::high_resolution_clock::now();
         mc_imp = monte_carlo_improved(N);
         auto finish = std::chrono::high_resolution_clock::now();
