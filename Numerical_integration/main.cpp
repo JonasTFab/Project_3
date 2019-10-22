@@ -296,6 +296,7 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
 } // end of function gauss_legendre()
 
 
+
 //int main(int nargs, char* args[]){
 int main(){
     int N;
@@ -496,6 +497,9 @@ int main(){
 //mpicxx  -o main_mpi.x  main.cpp -std=c++11
 //mpiexec -n 2 ./main_mpi.x 8
 
+
+
+
 //Junk that may be useful some day
 /*
 void write_to_file(){
@@ -512,4 +516,6 @@ void write_to_file(){
     data << N << " " << mc << " " << error << std::endl;
   }
   data.close();
-}*/
+}
+*/
+
