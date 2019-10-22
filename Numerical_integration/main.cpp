@@ -295,23 +295,6 @@ void gauss_laguerre(double *x, double *w, int n, double alf)
     }
 } // end of function gauss_legendre()
 
-void write_to_file(){
-  srand(time(NULL));// seed random number generator with the time now
-  int num = 9;
-  double lamb = 2.3;
-  std::ofstream data;
-  data.open("brute_monte_carlo_accuracy.txt");
-  //data << "N" << "Integral" << "Error" << std::endl;
-  for (int i = 1; i < num;i++){
-    int N = pow(10,i);
-    double mc = brute_monte_carlo(N, -lamb, lamb);
-    double error = fabs(mc - 5*pi*pi/(16*16));
-    data << N << " " << mc << " " << error << std::endl;
-  }
-  data.close();
-}
-
-
 
 //int main(int nargs, char* args[]){
 int main(){
@@ -512,3 +495,21 @@ int main(){
 
 //mpicxx  -o main_mpi.x  main.cpp -std=c++11
 //mpiexec -n 2 ./main_mpi.x 8
+
+//Junk that may be useful some day
+/*
+void write_to_file(){
+  srand(time(NULL));// seed random number generator with the time now
+  int num = 9;
+  double lamb = 2.3;
+  std::ofstream data;
+  data.open("brute_monte_carlo_accuracy.txt");
+  //data << "N" << "Integral" << "Error" << std::endl;
+  for (int i = 1; i < num;i++){
+    int N = pow(10,i);
+    double mc = brute_monte_carlo(N, -lamb, lamb);
+    double error = fabs(mc - 5*pi*pi/(16*16));
+    data << N << " " << mc << " " << error << std::endl;
+  }
+  data.close();
+}*/
